@@ -3,12 +3,14 @@
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Windows 10/11 with WSL 2
-- Docker Desktop
-- VS Code with Remote-WSL extension
-- Git with SSH keys configured
+
+* Windows 10/11 with WSL 2
+* Docker Desktop
+* VS Code with Remote-WSL extension
+* Git with SSH keys configured
 
 ### Development Setup
+
 ```bash
 # Clone the repository
 git clone git@github.com:your-org/iworkz-platform.git
@@ -27,12 +29,14 @@ cd ../investors-website && npm install
 ```
 
 ### Access Points
-- **Web Frontend**: http://localhost:3000
-- **Investors Site**: http://localhost:3001
-- **API Documentation**: http://localhost:8000/docs
-- **Admin Dashboard**: http://localhost:3002
+
+* **Web Frontend**: [http://localhost:3000](http://localhost:3000)
+* **Investors Site**: [http://localhost:3001](http://localhost:3001)
+* **API Documentation**: [http://localhost:8000/docs](http://localhost:8000/docs)
+* **Admin Dashboard**: [http://localhost:3002](http://localhost:3002)
 
 ## 📁 Project Structure
+
 ```
 iw_pl_dev_v02/
 ├── 0_ENV_SETUP/          # Environment setup guides
@@ -47,27 +51,31 @@ iw_pl_dev_v02/
 ## 🛠️ Services Overview
 
 ### Frontend Services
-- **web-frontend**: Main user interface (Next.js)
-- **mobile-app**: React Native mobile application
-- **investors-website**: Dedicated investor portal
-- **admin-dashboard**: Administrative interface
+
+* **web-frontend**: Main user interface (Next.js)
+* **mobile-app**: React Native mobile application
+* **investors-website**: Dedicated investor portal
+* **admin-dashboard**: Administrative interface
 
 ### Backend Services
-- **backend-api**: Main API gateway and business logic
-- **ai-agent**: AI/ML processing and recommendations
-- **voice-assistant**: Voice interaction processing
-- **matching-engine**: Job and talent matching algorithms
-- **credential-engine**: Verification and validation
-- **notification-service**: Multi-channel notifications
+
+* **backend-api**: Main API gateway and business logic
+* **ai-agent**: AI/ML processing and recommendations
+* **voice-assistant**: Voice interaction processing
+* **matching-engine**: Job and talent matching algorithms
+* **credential-engine**: Verification and validation
+* **notification-service**: Multi-channel notifications
 
 ### Data Services
-- **db-postgres**: Primary PostgreSQL database
-- **redis**: Caching and session management
-- **search**: Elasticsearch for full-text search
+
+* **db-postgres**: Primary PostgreSQL database
+* **redis**: Caching and session management
+* **search**: Elasticsearch for full-text search
 
 ## 🔧 Development Workflow
 
 ### Daily Development
+
 1. Start services: `docker-compose up -d`
 2. Work in VS Code with Remote-WSL
 3. Make changes and test locally
@@ -75,6 +83,7 @@ iw_pl_dev_v02/
 5. Push to feature branch and create PR
 
 ### Testing
+
 ```bash
 # Run unit tests
 npm test
@@ -90,6 +99,7 @@ docker-compose -f docker-compose.test.yml up
 ```
 
 ### Code Quality
+
 ```bash
 # Linting
 npm run lint
@@ -107,6 +117,7 @@ npm run pre-commit
 ## 🚀 Deployment
 
 ### Staging
+
 ```bash
 # Deploy to staging
 npm run deploy:staging
@@ -116,6 +127,7 @@ npm run test:smoke
 ```
 
 ### Production
+
 ```bash
 # Deploy to production (requires approval)
 npm run deploy:production
@@ -125,24 +137,28 @@ npm run monitor:deployment
 ```
 
 ## 📚 Documentation Links
-- [Project Overview](1_DOCUMENTATION/PROJECT_OVERVIEW.md)
-- [Architecture Guide](1_DOCUMENTATION/ARCHITECTURE.md)
-- [Container Guide](1_DOCUMENTATION/CONTAINER_GUIDE.md)
-- [Deployment Guide](1_DOCUMENTATION/DEPLOYMENT.md)
-- [Git Workflow](1_DOCUMENTATION/GIT_WORKFLOW.md)
+
+* [Project Overview](1_DOCUMENTATION/PROJECT_OVERVIEW.md)
+* [Architecture Guide](1_DOCUMENTATION/ARCHITECTURE.md)
+* [Container Guide](1_DOCUMENTATION/CONTAINER_GUIDE.md)
+* [Deployment Guide](1_DOCUMENTATION/DEPLOYMENT.md)
+* [Git Workflow](1_DOCUMENTATION/GIT_WORKFLOW.md)
 
 ## 🤖 AI Integration
-- [Agent Prompts](3_AI_AGENTS/AGENT_PROMPTS.md)
-- [Prompt Engineering](3_AI_AGENTS/PROMPT_ENGINEERING_GUIDE.md)
-- [API Keys Setup](3_AI_AGENTS/API_KEYS_GUIDE.md)
+
+* [Agent Prompts](3_AI_AGENTS/AGENT_PROMPTS.md)
+* [Prompt Engineering](3_AI_AGENTS/PROMPT_ENGINEERING_GUIDE.md)
+* [API Keys Setup](3_AI_AGENTS/API_KEYS_GUIDE.md)
 
 ## 🆘 Support
-- **Issues**: Create GitHub issues for bugs and feature requests
-- **Documentation**: Check the documentation folder first
-- **Environment**: Follow setup guides in 0_ENV_SETUP/
-- **Chat**: Team Slack channel #iworkz-dev
+
+* **Issues**: Create GitHub issues for bugs and feature requests
+* **Documentation**: Check the documentation folder first
+* **Environment**: Follow setup guides in 0\_ENV\_SETUP/
+* **Chat**: Team Slack channel #iworkz-dev
 
 ## 📝 Contributing
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -151,4 +167,5 @@ npm run monitor:deployment
 6. Submit a pull request
 
 ## 📄 License
+
 This project is proprietary and confidential. All rights reserved.
