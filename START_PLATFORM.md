@@ -20,6 +20,7 @@
 - **Compliance Engine** (FastAPI/Python) - Regulatory compliance on port 8003  
 - **Analytics Service** (FastAPI/Python) - Platform analytics on port 8004
 - **Integration Hub** (Node.js) - Third-party integrations on port 3005
+- **Tomoo Voice Assistant** (FastAPI/Electron) - AI voice concierge on port 8005
 
 ---
 
@@ -52,6 +53,8 @@ docker-compose ps
 - **Admin Panel**: http://localhost:3006
 - **Analytics**: http://localhost:8004/docs (Swagger UI)
 - **Compliance**: http://localhost:8003/docs (Swagger UI)
+- **Tomoo Voice**: http://localhost:8005/docs (Voice AI API)
+- **Voice Desktop**: Electron app (auto-launches with voice service)
 
 ## ✅ Verification Checklist
 

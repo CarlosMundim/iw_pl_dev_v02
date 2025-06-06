@@ -236,10 +236,42 @@ services:
       - iworkz-network
     restart: unless-stopped
 
+  # Voice Assistant (Tomoo AI)
+  voice-assistant:
+    build: ./2_SERVICES/voice-assistant
+    container_name: iworkz-tomoo
+    environment:
+      - VOICE_ASSISTANT_PORT=${VOICE_ASSISTANT_PORT}
+      - WHISPER_MODEL_SIZE=base
+      - TTS_MODEL=tts_models/en/ljspeech/tacotron2-DDC_ph
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - IWORKZ_API_URL=http://backend-api:${API_PORT}
+    ports:
+      - "${VOICE_ASSISTANT_PORT}:${VOICE_ASSISTANT_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend-api:
+        condition: service_started
+    volumes:
+      - ./2_SERVICES/voice-assistant:/app
+      - voice_models:/app/models
+      - voice_audio:/app/audio
+    networks:
+      - iworkz-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  voice_models:
+    driver: local
+  voice_audio:
     driver: local
 
 networks:

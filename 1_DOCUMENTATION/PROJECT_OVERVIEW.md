@@ -41,9 +41,12 @@ iWORKZ is an intelligent global talent platform, purpose-built to connect skille
 
 ### Backend Services
 - **API Gateway**: Central access point for all services
-- **AI Agent**: Platform intelligence
-- **Voice Assistant**: Handles natural language interaction
+- **AI Agent**: Platform intelligence and LLM processing
+- **Tomoo Voice Assistant**: AI-powered voice concierge with Whisper STT/Coqui TTS
 - **Matching Engine**: Advanced job/candidate algorithms
+- **Compliance Engine**: Multi-jurisdiction regulatory validation
+- **Analytics Service**: Real-time platform metrics and insights
+- **Integration Hub**: Third-party service connectors
 - **Credential Engine**: Secure verification of qualifications
 - **Notification Service**: Multi-channel communications
 

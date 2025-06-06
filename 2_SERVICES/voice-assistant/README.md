@@ -1,16 +1,17 @@
-# Voice Assistant Service
+# Tomoo AI Concierge - Voice Assistant Service
 
 ## Overview
-Voice interaction service providing speech-to-text, text-to-speech, and natural language understanding capabilities.
+
+Tomoo is an intelligent AI voice concierge for the iWORKZ platform, providing voice-enabled job search assistance, career guidance, and platform navigation. Built with FastAPI backend and Electron desktop frontend, featuring Whisper speech-to-text, Coqui text-to-speech, and optional local LLM support.
 
 ## Tech Stack
-- **Language**: Python 3.11+
-- **Framework**: FastAPI + WebSocket
-- **Speech Recognition**: OpenAI Whisper, Google Speech-to-Text
-- **Text-to-Speech**: ElevenLabs, Azure Speech Services
-- **NLU**: Rasa, spaCy
-- **Real-time**: WebRTC, Socket.io
-- **Audio Processing**: PyAudio, librosa
+- **Backend**: FastAPI (Python 3.11+)
+- **Frontend**: Electron (Node.js 18+)
+- **Speech Recognition**: OpenAI Whisper
+- **Text-to-Speech**: Coqui TTS
+- **LLM**: llama.cpp (optional local models)
+- **Audio Processing**: librosa, soundfile, PyAudio
+- **Real-time**: WebSocket, WebRTC
 
 ## Development Setup
 ```bash

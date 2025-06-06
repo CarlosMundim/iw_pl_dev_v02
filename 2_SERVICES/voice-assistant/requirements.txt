@@ -1,0 +1,35 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-dotenv==1.0.0
+websockets==12.0
+python-multipart==0.0.6
+aiofiles==23.2.1
+
+# Voice Processing
+openai-whisper==20231117
+TTS==0.22.0
+soundfile==0.12.1
+librosa==0.10.1
+numpy==1.25.2
+torch==2.1.1
+torchaudio==2.1.1
+
+# LLM Support
+llama-cpp-python==0.2.20
+transformers==4.36.0
+accelerate==0.25.0
+
+# Audio Processing
+pyaudio==0.2.11
+wave==0.0.2
+pydub==0.25.1
+
+# Database & Logging
+sqlite3
+datetime
+logging
+
+# Optional: API integrations
+requests==2.31.0
+httpx==0.25.2
