@@ -1,11 +1,15 @@
 # Container Guide
 
 ## Docker Services Overview
+
 The iWORKZ platform uses Docker containers for consistent development and deployment environments.
+
+---
 
 ## Service Configuration
 
 ### Frontend Services
+
 ```yaml
 # Web Frontend
 web-frontend:
@@ -27,6 +31,7 @@ investors-website:
 ```
 
 ### Backend Services
+
 ```yaml
 # API Gateway
 backend-api:
@@ -49,6 +54,7 @@ matching-engine:
 ```
 
 ### Data Services
+
 ```yaml
 # PostgreSQL Database
 db-postgres:
@@ -77,9 +83,12 @@ search:
     - xpack.security.enabled=false
 ```
 
+---
+
 ## Container Management
 
 ### Development Workflow
+
 ```bash
 # Start all services
 docker-compose up -d
@@ -98,25 +107,29 @@ docker-compose exec [service-name] bash
 ```
 
 ### Production Considerations
-- Use multi-stage builds for smaller images
-- Implement health checks for all services
-- Set resource limits and reservations
-- Use secrets management for sensitive data
-- Enable logging drivers for centralized logs
+
+* Use multi-stage builds for smaller images
+* Implement health checks for all services
+* Set resource limits and reservations
+* Use secrets management for sensitive data
+* Enable logging drivers for centralized logs
 
 ### Networking
-- Services communicate via internal Docker network
-- External access only through exposed ports
-- Use service names for inter-service communication
-- Implement service discovery for dynamic scaling
+
+* Services communicate via internal Docker network
+* External access only through exposed ports
+* Use service names for inter-service communication
+* Implement service discovery for dynamic scaling
 
 ### Data Persistence
-- Database data persisted in named volumes
-- Application logs mounted to host filesystem
-- Configuration files mounted as bind mounts
-- Backup strategies for critical data
+
+* Database data persisted in named volumes
+* Application logs mounted to host filesystem
+* Configuration files mounted as bind mounts
+* Backup strategies for critical data
 
 ### Monitoring
+
 ```yaml
 # Prometheus
 prometheus:
