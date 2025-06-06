@@ -1,18 +1,18 @@
 # WSLセットアップガイド
 
-このガイドでは、iWORKZプラットフォーム開発のためのWindows Subsystem for Linux（WSL）のインストール・設定手順を解説します。
+このガイドでは、iWORKZプラットフォーム開発環境向けにWindows Subsystem for Linux（WSL）の最適なセットアップ手順を解説します。
 
 ---
 
 ## 概要
 
-WSLを活用して、Windows環境で高速かつ信頼性の高いLinux開発環境を構築します。
+このガイドは、iWORKZプラットフォームのためにWindows Subsystem for Linux（WSL）をセットアップする方法をまとめています。
 
 ---
 
 ## 前提条件
 
-* Windows 10（バージョン2004以降／ビルド19041以降）、またはWindows 11
+* Windows 10 バージョン2004以降（ビルド19041以上）、またはWindows 11
 
 ---
 
@@ -20,9 +20,8 @@ WSLを活用して、Windows環境で高速かつ信頼性の高いLinux開発�
 
 ### 1. WSLの有効化
 
-管理者権限で以下を実行：
-
 ```powershell
+# 管理者として実行
 wsl --install
 ```
 
@@ -34,17 +33,17 @@ wsl --install -d Ubuntu
 
 ### 3. Linuxユーザーのセットアップ
 
-* ユーザー名とパスワードを設定
+* プロンプトに従い、ユーザー名とパスワードを作成します。
 * パッケージを最新化：
 
 ```bash
 sudo apt update && sudo apt upgrade -y
 ```
 
-### 4. 開発ツールのインストール
+### 4. 必須開発ツールのインストール
 
 ```bash
-# Git、curl、wget、build-essentialなど必須ツール
+# Git、curl、build-essentialのインストール
 sudo apt install git curl wget build-essential -y
 
 # Node.js（NodeSource経由）
@@ -57,9 +56,9 @@ sudo sh get-docker.sh
 sudo usermod -aG docker $USER
 ```
 
-### 5. WSLの構成
+### 5. WSLの設定
 
-systemd有効化とマウント最適化のため `/etc/wsl.conf` を作成：
+システム拡張用に`/etc/wsl.conf`を作成：
 
 ```ini
 [boot]
@@ -74,6 +73,6 @@ options="metadata"
 
 ## トラブルシューティング
 
-* WSLのインストールに失敗した場合は「Windowsの機能の有効化」から必要機能を手動でオンにしてください
-* 大きな変更後はPCを再起動
-* サービス停止や更新時はPowerShellで`wsl --shutdown`を実行しWSLを再起動
+* WSLのインストールに失敗する場合は、Windowsの「Windowsの機能の有効化または無効化」でWSLおよび仮想マシンプラットフォームが有効か確認
+* 主要な変更後はPCを再起動
+* 問題が解決しない場合は`wsl --shutdown`でWSLを完全に再起動
