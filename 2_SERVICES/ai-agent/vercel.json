@@ -1,0 +1,64 @@
+{
+  "name": "iworkz-ai-agent",
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/main.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/health",
+      "dest": "src/main.py"
+    },
+    {
+      "src": "/docs",
+      "dest": "src/main.py"
+    },
+    {
+      "src": "/openapi.json",
+      "dest": "src/main.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "src/main.py"
+    }
+  ],
+  "env": {
+    "USE_MOCK_AI": "true",
+    "MOCK_RESPONSE_DELAY": "0.8",
+    "ENVIRONMENT": "production",
+    "LOG_LEVEL": "INFO",
+    "ENABLE_OPENAI": "false",
+    "ENABLE_ANTHROPIC": "false",
+    "ENABLE_LOCAL_MODELS": "false"
+  },
+  "functions": {
+    "src/main.py": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "name": "iworkz-web-frontend",
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://iworkz-backend-api.vercel.app/api/v1",
+    "NEXT_PUBLIC_AI_URL": "https://iworkz-ai-agent.vercel.app",
+    "NEXT_PUBLIC_APP_NAME": "iWORKZ Platform",
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_API_URL": "https://iworkz-backend-api.vercel.app/api/v1",
+      "NEXT_PUBLIC_AI_URL": "https://iworkz-ai-agent.vercel.app"
+    }
+  },
+  "functions": {
+    "app/api/**/*.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://iworkz-backend-api.vercel.app/api/:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
+  ]
+}
