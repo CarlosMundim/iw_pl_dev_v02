@@ -1,17 +1,20 @@
 # Git Workflow Guide
 
 ## Branching Strategy
-We use a modified Git Flow strategy optimized for continuous deployment.
+
+We use a modified Git Flow strategy optimised for continuous deployment.
 
 ### Branch Types
-- **main**: Production-ready code
-- **develop**: Integration branch for features
-- **feature/***: New features and enhancements
-- **bugfix/***: Bug fixes for develop branch
-- **hotfix/***: Critical fixes for production
-- **release/***: Release preparation
+
+* **main**: Production-ready code
+* **develop**: Integration branch for features
+* **feature/**\*: New features and enhancements
+* **bugfix/**\*: Bug fixes for develop branch
+* **hotfix/**\*: Critical fixes for production
+* **release/**\*: Release preparation
 
 ### Branch Naming Convention
+
 ```bash
 # Features
 feature/user-authentication
@@ -31,9 +34,12 @@ release/v1.2.0
 release/v1.2.1
 ```
 
+---
+
 ## Workflow Process
 
 ### Feature Development
+
 ```bash
 # 1. Start from develop branch
 git checkout develop
@@ -58,6 +64,7 @@ git branch -d feature/new-matching-algorithm
 ```
 
 ### Release Process
+
 ```bash
 # 1. Create release branch from develop
 git checkout develop
@@ -78,6 +85,7 @@ git merge release/v1.2.0
 ```
 
 ### Hotfix Process
+
 ```bash
 # 1. Create hotfix from main
 git checkout main
@@ -96,10 +104,14 @@ git checkout develop
 git merge hotfix/critical-security-fix
 ```
 
+---
+
 ## Commit Message Convention
-We follow Conventional Commits specification:
+
+We follow the Conventional Commits specification:
 
 ### Format
+
 ```
 type(scope): description
 
@@ -109,28 +121,33 @@ type(scope): description
 ```
 
 ### Types
-- **feat**: New feature
-- **fix**: Bug fix
-- **docs**: Documentation changes
-- **style**: Code style changes (formatting, etc.)
-- **refactor**: Code refactoring
-- **test**: Adding or updating tests
-- **chore**: Maintenance tasks
+
+* **feat**: New feature
+* **fix**: Bug fix
+* **docs**: Documentation changes
+* **style**: Code style changes (formatting, etc.)
+* **refactor**: Code refactoring
+* **test**: Adding or updating tests
+* **chore**: Maintenance tasks
 
 ### Examples
+
 ```bash
 feat(auth): add OAuth2 authentication
 fix(api): resolve database connection timeout
 docs(readme): update installation instructions
 style(frontend): format React components
-refactor(matching): optimize algorithm performance
+refactor(matching): optimise algorithm performance
 test(api): add integration tests for user endpoints
 chore(deps): update Node.js dependencies
 ```
 
+---
+
 ## Pull Request Guidelines
 
 ### PR Template
+
 ```markdown
 ## Description
 Brief description of changes made.
@@ -157,14 +174,19 @@ Include screenshots of UI changes.
 ```
 
 ### Review Process
+
 1. **Automated Checks**: CI/CD pipeline must pass
 2. **Code Review**: At least one team member review
 3. **Testing**: All tests must pass
 4. **Documentation**: Update docs if needed
 5. **Approval**: Required before merging
 
+---
+
 ## Git Hooks
+
 ### Pre-commit Hook
+
 ```bash
 #!/bin/sh
 # Run linting and tests before commit
@@ -173,6 +195,7 @@ npm run test:unit
 ```
 
 ### Pre-push Hook
+
 ```bash
 #!/bin/sh
 # Run full test suite before push
@@ -180,7 +203,10 @@ npm run test
 npm run build
 ```
 
+---
+
 ## Best Practices
+
 1. **Small Commits**: Make atomic, focused commits
 2. **Clear Messages**: Write descriptive commit messages
 3. **Regular Pushes**: Push work frequently to backup
