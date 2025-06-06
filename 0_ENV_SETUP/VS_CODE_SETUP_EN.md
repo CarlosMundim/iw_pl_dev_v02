@@ -1,11 +1,20 @@
 # VS Code Setup Guide
 
+This guide explains how to install Visual Studio Code (VS Code), add essential extensions, configure recommended settings, and enable a productive environment for the iWORKZ platform.
+
+---
+
 ## Installation
-Download from: https://code.visualstudio.com/
+
+* Download and install VS Code from: [https://code.visualstudio.com/](https://code.visualstudio.com/)
+
+---
 
 ## Essential Extensions
+
+Install these recommended extensions for web, TypeScript, and container development:
+
 ```bash
-# Install via command line
 code --install-extension ms-vscode-remote.remote-wsl
 code --install-extension ms-vscode.vscode-typescript-next
 code --install-extension bradlc.vscode-tailwindcss
@@ -18,8 +27,12 @@ code --install-extension GitHub.github-vscode-theme
 code --install-extension PKief.material-icon-theme
 ```
 
+---
+
 ## Settings Configuration
-Create `.vscode/settings.json` in project root:
+
+Create a `.vscode/settings.json` file in your project root with these recommended options:
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -38,8 +51,12 @@ Create `.vscode/settings.json` in project root:
 }
 ```
 
+---
+
 ## Workspace Configuration
-Create `.vscode/launch.json`:
+
+Create `.vscode/launch.json` to enable debugging and workflow support:
+
 ```json
 {
   "version": "0.2.0",
@@ -60,7 +77,14 @@ Create `.vscode/launch.json`:
 }
 ```
 
+---
+
 ## WSL Integration
-- Install "Remote - WSL" extension
-- Open WSL terminal in VS Code: `Ctrl+Shift+`` 
-- Open project in WSL: `code .` from WSL terminal
+
+* Install the "Remote - WSL" extension for seamless Linux development.
+* Open the WSL terminal in VS Code with \`Ctrl+Shift+\`\`.
+* To open a project in WSL, use `code .` from your WSL terminal.
+
+---
+
+> **Tip:** For best results, always keep VS Code and your extensions up to date, and use `.vscode` workspace settings for team consistency.
