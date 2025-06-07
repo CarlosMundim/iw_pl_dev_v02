@@ -94,4 +94,3 @@ npm run serve
 
 ---
 
-Carlos, this document will evolve as the platform grows. Every update, every feature, and every learning will be added here for full continuity. Let’s keep the ambition global and the UX world-class. Next: the Japanese version!
