@@ -1,16 +1,19 @@
 # PostgreSQL Database Service
 
 ## Overview
+
 Primary database service for the iWORKZ platform providing ACID compliance, advanced querying, and high performance.
 
 ## Database Configuration
-- **Version**: PostgreSQL 15+
-- **Extensions**: uuid-ossp, pgcrypto, pg_stat_statements
-- **Connection Pooling**: PgBouncer
-- **Replication**: Master-Slave setup
-- **Backup**: Automated daily backups
+
+* **Version**: PostgreSQL 15+
+* **Extensions**: uuid-ossp, pgcrypto, pg\_stat\_statements
+* **Connection Pooling**: PgBouncer
+* **Replication**: Master-Slave setup
+* **Backup**: Automated daily backups
 
 ## Development Setup
+
 ```bash
 # Start PostgreSQL container
 docker-compose up db-postgres -d
@@ -29,7 +32,9 @@ npm run db:reset
 ```
 
 ## Schema Overview
+
 ### Core Tables
+
 ```sql
 -- Users and Authentication
 users
@@ -65,7 +70,9 @@ performance_metrics
 ```
 
 ## Database Schema
+
 ### Users Table
+
 ```sql
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -78,7 +85,7 @@ CREATE TABLE users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     last_login_at TIMESTAMP WITH TIME ZONE,
     
-    CONSTRAINT valid_email CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+    CONSTRAINT valid_email CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$')
 );
 
 CREATE INDEX idx_users_email ON users(email);
@@ -87,6 +94,7 @@ CREATE INDEX idx_users_status ON users(status);
 ```
 
 ### Jobs Table
+
 ```sql
 CREATE TABLE jobs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -116,6 +124,7 @@ CREATE INDEX idx_jobs_requirements ON jobs USING GIN(requirements);
 ```
 
 ## Custom Types
+
 ```sql
 -- Enums for better type safety
 CREATE TYPE user_role AS ENUM ('candidate', 'employer', 'admin', 'moderator');
@@ -127,7 +136,9 @@ CREATE TYPE application_status AS ENUM ('pending', 'reviewing', 'shortlisted', '
 ```
 
 ## Database Functions
+
 ### Update Timestamp Function
+
 ```sql
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -138,12 +149,13 @@ END;
 $$ language 'plpgsql';
 
 -- Apply to relevant tables
-CREATE TRIGGER update_users_updated_at 
-    BEFORE UPDATE ON users 
+CREATE TRIGGER update_users_updated_at
+    BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 ### Search Functions
+
 ```sql
 -- Full-text search for jobs
 CREATE INDEX idx_jobs_search ON jobs USING GIN(
@@ -160,14 +172,14 @@ RETURNS TABLE(
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         j.id,
         j.title,
         j.description,
-        ts_rank(to_tsvector('english', j.title || ' ' || j.description), 
+        ts_rank(to_tsvector('english', j.title || ' ' || j.description),
                 plainto_tsquery('english', search_term)) as rank
     FROM jobs j
-    WHERE to_tsvector('english', j.title || ' ' || j.description) 
+    WHERE to_tsvector('english', j.title || ' ' || j.description)
           @@ plainto_tsquery('english', search_term)
     ORDER BY rank DESC;
 END;
@@ -175,19 +187,23 @@ $$ LANGUAGE plpgsql;
 ```
 
 ## Performance Optimization
+
 ### Indexing Strategy
-- B-tree indexes for exact matches and ranges
-- GIN indexes for JSONB and full-text search
-- Partial indexes for filtered queries
-- Composite indexes for multi-column queries
+
+* B-tree indexes for exact matches and ranges
+* GIN indexes for JSONB and full-text search
+* Partial indexes for filtered queries
+* Composite indexes for multi-column queries
 
 ### Query Optimization
-- Use EXPLAIN ANALYZE for query planning
-- Implement proper WHERE clause ordering
-- Utilize prepared statements
-- Regular VACUUM and ANALYZE operations
+
+* Use EXPLAIN ANALYZE for query planning
+* Implement proper WHERE clause ordering
+* Utilize prepared statements
+* Regular VACUUM and ANALYZE operations
 
 ## Backup and Recovery
+
 ```bash
 # Create backup
 pg_dump -h localhost -p 5432 -U iworkz_user iworkz > backup.sql
@@ -205,8 +221,9 @@ archive_command = 'cp %p /var/lib/postgresql/archive/%f'
 ```
 
 ## Monitoring and Maintenance
-- **pg_stat_statements**: Query performance tracking
-- **Connection monitoring**: Active connections and locks
-- **Disk usage**: Table and index size monitoring
-- **Query analysis**: Slow query identification
-- **Health checks**: Database connectivity and performance
+
+* **pg\_stat\_statements**: Query performance tracking
+* **Connection monitoring**: Active connections and locks
+* **Disk usage**: Table and index size monitoring
+* **Query analysis**: Slow query identification
+* **Health checks**: Database connectivity and performance
