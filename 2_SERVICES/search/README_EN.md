@@ -1,16 +1,19 @@
 # Search Service (Elasticsearch)
 
 ## Overview
+
 Full-text search engine providing fast, scalable search capabilities across jobs, candidates, and content.
 
 ## Tech Stack
-- **Engine**: Elasticsearch 8.8+
-- **Client Libraries**: @elastic/elasticsearch (Node.js), elasticsearch-py (Python)
-- **Analytics**: Kibana for data visualization
-- **Monitoring**: Elastic APM
-- **Security**: X-Pack Security features
+
+* **Engine**: Elasticsearch 8.8+
+* **Client Libraries**: @elastic/elasticsearch (Node.js), elasticsearch-py (Python)
+* **Analytics**: Kibana for data visualization
+* **Monitoring**: Elastic APM
+* **Security**: X-Pack Security features
 
 ## Development Setup
+
 ```bash
 # Start Elasticsearch container
 docker-compose up search -d
@@ -29,7 +32,9 @@ curl -X GET "localhost:9200/_cluster/health?pretty"
 ```
 
 ## Index Configuration
+
 ### Jobs Index
+
 ```json
 {
   "mappings": {
@@ -109,6 +114,7 @@ curl -X GET "localhost:9200/_cluster/health?pretty"
 ```
 
 ### Candidates Index
+
 ```json
 {
   "mappings": {
@@ -165,7 +171,9 @@ curl -X GET "localhost:9200/_cluster/health?pretty"
 ```
 
 ## Search Queries
+
 ### Job Search
+
 ```javascript
 const jobSearchQuery = {
   query: {
@@ -209,6 +217,7 @@ const jobSearchQuery = {
 ```
 
 ### Candidate Search
+
 ```javascript
 const candidateSearchQuery = {
   query: {
@@ -256,7 +265,9 @@ const candidateSearchQuery = {
 ```
 
 ## Advanced Features
+
 ### Auto-completion
+
 ```javascript
 const suggestionQuery = {
   suggest: {
@@ -275,6 +286,7 @@ const suggestionQuery = {
 ```
 
 ### Semantic Search
+
 ```javascript
 // Using vector search for semantic similarity
 const semanticQuery = {
@@ -293,10 +305,12 @@ const semanticQuery = {
 ```
 
 ## Performance Optimization
+
 ### Index Templates
+
 ```json
 {
-  "index_patterns": ["jobs-*"],
+  "index_patterns": ["jobs-*"] ,
   "template": {
     "settings": {
       "number_of_shards": 2,
@@ -309,14 +323,17 @@ const semanticQuery = {
 ```
 
 ### Search Performance
-- Use filters instead of queries when possible
-- Implement result caching
-- Optimize aggregations with cardinality limits
-- Use index aliases for zero-downtime reindexing
-- Monitor slow queries and optimize
+
+* Use filters instead of queries when possible
+* Implement result caching
+* Optimize aggregations with cardinality limits
+* Use index aliases for zero-downtime reindexing
+* Monitor slow queries and optimize
 
 ## Data Pipeline
+
 ### Real-time Indexing
+
 ```javascript
 // Index new job posting
 await esClient.index({
@@ -336,6 +353,7 @@ await esClient.update({
 ```
 
 ### Bulk Operations
+
 ```javascript
 // Bulk indexing for better performance
 const bulkBody = jobs.flatMap(job => [
@@ -347,7 +365,9 @@ await esClient.bulk({ body: bulkBody });
 ```
 
 ## Monitoring and Maintenance
+
 ### Health Checks
+
 ```bash
 # Cluster health
 curl "localhost:9200/_cluster/health?pretty"
@@ -360,13 +380,15 @@ curl "localhost:9200/_nodes/stats?pretty"
 ```
 
 ### Performance Monitoring
-- Query execution times
-- Index size and growth
-- Memory and CPU usage
-- Search throughput and latency
-- Failed query analysis
+
+* Query execution times
+* Index size and growth
+* Memory and CPU usage
+* Search throughput and latency
+* Failed query analysis
 
 ## Security Configuration
+
 ```yaml
 # X-Pack Security settings
 xpack.security.enabled: true
@@ -376,5 +398,5 @@ xpack.security.enrollment.enabled: true
 xpack.security.authc.api_key.enabled: true
 
 # Role-based access control
-xpack.security.authc.realms.native.native1.order: 0
+xpack.security.authc.realms.native.native1.order
 ```
