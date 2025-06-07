@@ -1,16 +1,19 @@
 # Redis Service
 
 ## Overview
+
 High-performance in-memory data store used for caching, session management, and real-time features.
 
 ## Configuration
-- **Version**: Redis 7+
-- **Memory**: 2GB allocated
-- **Persistence**: RDB + AOF
-- **Clustering**: Single instance (dev), Redis Cluster (prod)
-- **Security**: AUTH enabled, TLS in production
+
+* **Version**: Redis 7+
+* **Memory**: 2GB allocated
+* **Persistence**: RDB + AOF
+* **Clustering**: Single instance (dev), Redis Cluster (prod)
+* **Security**: AUTH enabled, TLS in production
 
 ## Development Setup
+
 ```bash
 # Start Redis container
 docker-compose up redis -d
@@ -26,32 +29,39 @@ docker-compose exec redis redis-cli info
 ```
 
 ## Use Cases
+
 ### Caching Layer
-- Database query results
-- API response caching
-- Computed data storage
-- Frequently accessed objects
+
+* Database query results
+* API response caching
+* Computed data storage
+* Frequently accessed objects
 
 ### Session Management
-- User session storage
-- JWT token blacklisting
-- Temporary authentication codes
-- Rate limiting counters
+
+* User session storage
+* JWT token blacklisting
+* Temporary authentication codes
+* Rate limiting counters
 
 ### Real-time Features
-- WebSocket connection management
-- Real-time notifications
-- Live chat message queuing
-- Activity feeds
+
+* WebSocket connection management
+* Real-time notifications
+* Live chat message queuing
+* Activity feeds
 
 ### Background Jobs
-- Job queue management
-- Task scheduling
-- Progress tracking
-- Result storage
+
+* Job queue management
+* Task scheduling
+* Progress tracking
+* Result storage
 
 ## Data Structures Used
+
 ### Strings
+
 ```redis
 # User sessions
 SET session:user:123 "jwt_token_here" EX 3600
@@ -65,6 +75,7 @@ SET feature:ai_matching:enabled "true"
 ```
 
 ### Hashes
+
 ```redis
 # User profile cache
 HSET user:123 name "John Doe" email "john@example.com" role "candidate"
@@ -74,6 +85,7 @@ HSET application:456 job_id "789" candidate_id "123" status "pending"
 ```
 
 ### Lists
+
 ```redis
 # Recent activities
 LPUSH user:123:activities "Applied to job X"
@@ -84,6 +96,7 @@ LPUSH job_queue "process_application:456"
 ```
 
 ### Sets
+
 ```redis
 # User skills
 SADD user:123:skills "javascript" "python" "react"
@@ -96,6 +109,7 @@ SADD online_users "user:123" "user:456"
 ```
 
 ### Sorted Sets
+
 ```redis
 # Leaderboards
 ZADD user_scores 1500 "user:123" 1200 "user:456"
@@ -108,6 +122,7 @@ ZADD recent_applications 1640995200 "app:123" 1640995300 "app:124"
 ```
 
 ### Streams
+
 ```redis
 # Real-time events
 XADD events * event_type "job_applied" user_id "123" job_id "789"
@@ -117,7 +132,9 @@ XADD notifications * user_id "123" type "message" content "New job match found"
 ```
 
 ## Redis Modules
+
 ### RedisJSON
+
 ```redis
 # Store complex JSON objects
 JSON.SET user:123 $ '{"name":"John","skills":["js","python"],"preferences":{"remote":true}}'
@@ -127,13 +144,16 @@ JSON.GET user:123 $.skills
 ```
 
 ### RediSearch
+
 ```redis
 # Create search index for jobs
 FT.CREATE jobs_idx ON JSON PREFIX 1 job: SCHEMA $.title AS title TEXT $.location AS location TAG
 ```
 
 ## Performance Optimization
+
 ### Memory Optimization
+
 ```redis
 # Use appropriate data types
 # Compress large values
@@ -146,6 +166,7 @@ maxmemory-policy allkeys-lru
 ```
 
 ### Connection Pooling
+
 ```javascript
 // Node.js Redis connection pool
 const redis = require('ioredis');
@@ -157,14 +178,17 @@ const cluster = new redis.Cluster([
 ```
 
 ## Monitoring and Alerts
+
 ### Key Metrics
-- Memory usage and fragmentation
-- Commands per second
-- Hit/miss ratio for cache
-- Connection count
-- Slow log analysis
+
+* Memory usage and fragmentation
+* Commands per second
+* Hit/miss ratio for cache
+* Connection count
+* Slow log analysis
 
 ### Redis CLI Commands
+
 ```bash
 # Monitor performance
 INFO memory
@@ -182,7 +206,9 @@ INFO keyspace
 ```
 
 ## Backup and Persistence
+
 ### RDB Snapshots
+
 ```redis
 # Manual snapshot
 BGSAVE
@@ -194,6 +220,7 @@ save 60 10000   # Save if at least 10000 keys changed in 60 seconds
 ```
 
 ### AOF (Append Only File)
+
 ```redis
 # Enable AOF
 appendonly yes
@@ -204,6 +231,7 @@ BGREWRITEAOF
 ```
 
 ## Security Configuration
+
 ```redis
 # Set password
 requirepass your_strong_password
