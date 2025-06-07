@@ -1,19 +1,22 @@
 # Matching Engine Service
 
 ## Overview
+
 The iWORKZ Matching Engine is a Node.js/Express microservice responsible for intelligent job-candidate matching using AI-powered algorithms. It processes candidate profiles against job requirements and returns compatibility scores with detailed reasoning.
 
-## Tech Stack  
-- **Language**: Node.js 18+
-- **Framework**: Express.js
-- **ML Libraries**: scikit-learn, pandas, numpy
-- **Vector Computing**: FAISS, Annoy
-- **Graph Processing**: NetworkX
-- **Database**: PostgreSQL + Redis
-- **Queue System**: Celery
-- **Monitoring**: MLflow, Weights & Biases
+## Tech Stack
+
+* **Language**: Node.js 18+
+* **Framework**: Express.js
+* **ML Libraries**: scikit-learn, pandas, numpy
+* **Vector Computing**: FAISS, Annoy
+* **Graph Processing**: NetworkX
+* **Database**: PostgreSQL + Redis
+* **Queue System**: Celery
+* **Monitoring**: MLflow, Weights & Biases
 
 ## Development Setup
+
 ```bash
 # Create virtual environment
 python -m venv venv
@@ -33,32 +36,39 @@ python tests/test_matching_performance.py
 ```
 
 ## Matching Algorithm Components
+
 ### Skill Matching
-- Exact skill matches with weighted scoring
-- Semantic similarity using embeddings
-- Skill level assessment and gaps
-- Experience requirement matching
+
+* Exact skill matches with weighted scoring
+* Semantic similarity using embeddings
+* Skill level assessment and gaps
+* Experience requirement matching
 
 ### Location Matching
-- Geographic proximity calculation
-- Remote work preference handling
-- Timezone compatibility
-- Travel requirement assessment
+
+* Geographic proximity calculation
+* Remote work preference handling
+* Timezone compatibility
+* Travel requirement assessment
 
 ### Compensation Matching
-- Salary range compatibility
-- Benefits package alignment
-- Equity and bonus considerations
-- Cost of living adjustments
+
+* Salary range compatibility
+* Benefits package alignment
+* Equity and bonus considerations
+* Cost of living adjustments
 
 ### Cultural Fit Assessment
-- Company culture analysis
-- Work style preferences
-- Team dynamics compatibility
-- Value alignment scoring
+
+* Company culture analysis
+* Work style preferences
+* Team dynamics compatibility
+* Value alignment scoring
 
 ## Machine Learning Models
+
 ### Feature Engineering
+
 ```python
 # Candidate features
 candidate_vector = [
@@ -84,12 +94,14 @@ job_vector = [
 ```
 
 ### Ranking Models
-- **Linear Model**: Fast baseline matching
-- **Neural Network**: Deep feature learning
-- **Gradient Boosting**: High accuracy ranking
-- **Ensemble Model**: Combined predictions
+
+* **Linear Model**: Fast baseline matching
+* **Neural Network**: Deep feature learning
+* **Gradient Boosting**: High accuracy ranking
+* **Ensemble Model**: Combined predictions
 
 ## API Endpoints
+
 ```python
 POST /matching/find-candidates    # Find candidates for job
 POST /matching/find-jobs         # Find jobs for candidate
@@ -101,6 +113,7 @@ GET  /matching/metrics          # Matching performance metrics
 ```
 
 ## Matching Pipeline
+
 1. **Data Ingestion**: Job and candidate profiles
 2. **Feature Extraction**: Convert profiles to vectors
 3. **Candidate Filtering**: Initial compatibility screening
@@ -111,27 +124,31 @@ GET  /matching/metrics          # Matching performance metrics
 8. **Result Delivery**: Return ranked matches
 
 ## Performance Optimization
-- **Indexing**: FAISS for fast vector search
-- **Caching**: Redis for frequent queries
-- **Batching**: Efficient bulk processing
-- **Parallel Processing**: Multi-threading for scalability
-- **Model Optimization**: Quantization and pruning
+
+* **Indexing**: FAISS for fast vector search
+* **Caching**: Redis for frequent queries
+* **Batching**: Efficient bulk processing
+* **Parallel Processing**: Multi-threading for scalability
+* **Model Optimization**: Quantization and pruning
 
 ## Evaluation Metrics
-- **Precision@K**: Relevance of top-k matches
-- **Recall@K**: Coverage of relevant matches
-- **NDCG**: Normalized discounted cumulative gain
-- **AUC**: Area under ROC curve
-- **Mean Reciprocal Rank**: Average position of first relevant result
+
+* **Precision\@K**: Relevance of top-k matches
+* **Recall\@K**: Coverage of relevant matches
+* **NDCG**: Normalized discounted cumulative gain
+* **AUC**: Area under ROC curve
+* **Mean Reciprocal Rank**: Average position of first relevant result
 
 ## A/B Testing Framework
-- Model comparison and evaluation
-- Feature importance analysis
-- Performance monitoring
-- Automated model selection
-- Gradual rollout capabilities
+
+* Model comparison and evaluation
+* Feature importance analysis
+* Performance monitoring
+* Automated model selection
+* Gradual rollout capabilities
 
 ## Configuration
+
 ```bash
 # Model Settings
 MODEL_VERSION=v2.1.0
