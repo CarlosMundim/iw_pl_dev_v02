@@ -1,33 +1,38 @@
 # Admin Dashboard
 
 ## Overview
+
 The iWORKZ Admin Dashboard is a Next.js 14 administrative interface for platform management, user administration, analytics monitoring, and system oversight. It provides comprehensive tools for managing the iWORKZ platform.
 
 ## Features
-- **Real-time Dashboard**: Live platform metrics and KPIs
-- **User Management**: User administration and role management
-- **Service Monitoring**: Health status of all microservices
-- **Analytics Overview**: Platform performance and business metrics
-- **Quick Actions**: Direct access to management functions
-- **Responsive Design**: Mobile-friendly administrative interface
-- **Security**: Role-based access control and audit logging
+
+* **Real-time Dashboard**: Live platform metrics and KPIs
+* **User Management**: User administration and role management
+* **Service Monitoring**: Health status of all microservices
+* **Analytics Overview**: Platform performance and business metrics
+* **Quick Actions**: Direct access to management functions
+* **Responsive Design**: Mobile-friendly administrative interface
+* **Security**: Role-based access control and audit logging
 
 ## Tech Stack
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript
-- **UI Library**: Tailwind CSS + Headless UI
-- **Icons**: Heroicons
-- **State Management**: React hooks
-- **API Integration**: Axios for service communication
+
+* **Framework**: Next.js 14 with App Router
+* **Language**: TypeScript
+* **UI Library**: Tailwind CSS + Headless UI
+* **Icons**: Heroicons
+* **State Management**: React hooks
+* **API Integration**: Axios for service communication
 
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- npm 8+
-- Docker (for containerized deployment)
+
+* Node.js 18+
+* npm 8+
+* Docker (for containerized deployment)
 
 ### Local Development
+
 ```bash
 # Install dependencies
 npm install
@@ -39,6 +44,7 @@ npm run dev
 ```
 
 ### Docker Deployment
+
 ```bash
 # Build image
 docker build -t iworkz-admin-dashboard .
@@ -48,36 +54,43 @@ docker run -p 3006:3006 iworkz-admin-dashboard
 ```
 
 ## Key Features
+
 ### User Management
-- User account administration
-- Role and permission management
-- Account verification and suspension
-- Bulk user operations
-- User activity monitoring
+
+* User account administration
+* Role and permission management
+* Account verification and suspension
+* Bulk user operations
+* User activity monitoring
 
 ### Platform Analytics
-- Key performance indicators (KPIs)
-- User engagement metrics
-- Job posting and matching statistics
-- Revenue and financial reporting
-- Real-time dashboard updates
+
+* Key performance indicators (KPIs)
+* User engagement metrics
+* Job posting and matching statistics
+* Revenue and financial reporting
+* Real-time dashboard updates
 
 ### Content Moderation
-- Job posting review and approval
-- User-generated content moderation
-- Automated content filtering
-- Report management system
-- Compliance monitoring
+
+* Job posting review and approval
+* User-generated content moderation
+* Automated content filtering
+* Report management system
+* Compliance monitoring
 
 ### System Administration
-- Service health monitoring
-- Database administration tools
-- Performance metrics and alerts
-- Configuration management
-- Audit log viewing
+
+* Service health monitoring
+* Database administration tools
+* Performance metrics and alerts
+* Configuration management
+* Audit log viewing
 
 ## Dashboard Modules
+
 ### Main Dashboard
+
 ```typescript
 interface DashboardMetrics {
   users: {
@@ -108,21 +121,25 @@ interface DashboardMetrics {
 ```
 
 ### User Analytics
-- User registration trends
-- Engagement heatmaps
-- Feature usage statistics
-- Geographic distribution
-- Cohort analysis
+
+* User registration trends
+* Engagement heatmaps
+* Feature usage statistics
+* Geographic distribution
+* Cohort analysis
 
 ### Job Analytics
-- Job posting trends
-- Industry distribution
-- Salary range analysis
-- Time-to-fill metrics
-- Success rate by category
+
+* Job posting trends
+* Industry distribution
+* Salary range analysis
+* Time-to-fill metrics
+* Success rate by category
 
 ## Component Library
+
 ### Data Visualization
+
 ```typescript
 // KPI Card Component
 interface KPICardProps {
@@ -142,6 +159,7 @@ interface ChartProps {
 ```
 
 ### Admin Tables
+
 ```typescript
 // User Management Table
 interface UserTableRow {
@@ -167,7 +185,9 @@ interface JobTableRow {
 ```
 
 ## Security Features
+
 ### Role-Based Access Control
+
 ```typescript
 enum AdminRole {
   SUPER_ADMIN = 'super_admin',
@@ -204,6 +224,7 @@ interface AdminPermissions {
 ```
 
 ### Audit Logging
+
 ```typescript
 interface AuditLog {
   id: string;
@@ -219,14 +240,17 @@ interface AuditLog {
 ```
 
 ## Real-time Features
+
 ### Live Updates
-- Real-time user activity
-- Live chat support integration
-- System alerts and notifications
-- Performance metric updates
-- Event stream monitoring
+
+* Real-time user activity
+* Live chat support integration
+* System alerts and notifications
+* Performance metric updates
+* Event stream monitoring
 
 ### WebSocket Integration
+
 ```typescript
 const socket = io('/admin', {
   auth: {
@@ -248,14 +272,17 @@ socket.on('system_alert', (alert) => {
 ```
 
 ## Reports and Analytics
+
 ### Automated Reports
-- Daily activity summaries
-- Weekly performance reports
-- Monthly business intelligence
-- Quarterly trend analysis
-- Custom report generation
+
+* Daily activity summaries
+* Weekly performance reports
+* Monthly business intelligence
+* Quarterly trend analysis
+* Custom report generation
 
 ### Data Export
+
 ```typescript
 // Export functionality
 const exportData = async (type: 'users' | 'jobs' | 'analytics', format: 'csv' | 'xlsx' | 'pdf') => {
@@ -265,7 +292,9 @@ const exportData = async (type: 'users' | 'jobs' | 'analytics', format: 'csv' | 
 ```
 
 ## System Monitoring
+
 ### Health Checks
+
 ```typescript
 interface SystemHealth {
   services: {
@@ -288,13 +317,15 @@ interface SystemHealth {
 ```
 
 ### Alert Management
-- System performance alerts
-- Error rate thresholds
-- Resource usage warnings
-- Security incident notifications
-- Custom alert rules
+
+* System performance alerts
+* Error rate thresholds
+* Resource usage warnings
+* Security incident notifications
+* Custom alert rules
 
 ## Environment Variables
+
 ```bash
 # Admin Authentication
 ADMIN_JWT_SECRET=your-admin-jwt-secret
@@ -315,8 +346,9 @@ ENABLE_SYSTEM_MONITORING=true
 ```
 
 ## Deployment
-- Separate deployment from main application
-- Restricted network access
-- VPN-only access in production
-- Enhanced security monitoring
-- Regular security audits
+
+* Separate deployment from main application
+* Restricted network access
+* VPN-only access in production
+* Enhanced security monitoring
+* Regular security audits
