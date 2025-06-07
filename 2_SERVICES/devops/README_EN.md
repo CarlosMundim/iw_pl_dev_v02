@@ -1,17 +1,20 @@
 # DevOps Service
 
 ## Overview
+
 Infrastructure as Code, CI/CD pipelines, monitoring, and deployment automation for the iWORKZ platform.
 
 ## Tech Stack
-- **Infrastructure**: Terraform, AWS/GCP/Azure
-- **Containerization**: Docker, Kubernetes
-- **CI/CD**: GitHub Actions, GitLab CI
-- **Monitoring**: Prometheus, Grafana, ELK Stack
-- **Security**: HashiCorp Vault, SOPS
-- **Automation**: Ansible, Helm Charts
+
+* **Infrastructure**: Terraform, AWS/GCP/Azure
+* **Containerization**: Docker, Kubernetes
+* **CI/CD**: GitHub Actions, GitLab CI
+* **Monitoring**: Prometheus, Grafana, ELK Stack
+* **Security**: HashiCorp Vault, SOPS
+* **Automation**: Ansible, Helm Charts
 
 ## Repository Structure
+
 ```
 devops/
 ├── terraform/
@@ -35,7 +38,9 @@ devops/
 ```
 
 ## Infrastructure as Code
+
 ### Terraform Configuration
+
 ```hcl
 # Main VPC and Networking
 module "vpc" {
@@ -101,7 +106,9 @@ module "database" {
 ```
 
 ## Kubernetes Manifests
+
 ### Application Deployment
+
 ```yaml
 # frontend-deployment.yaml
 apiVersion: apps/v1
@@ -170,6 +177,7 @@ spec:
 ```
 
 ### Ingress Configuration
+
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -210,7 +218,9 @@ spec:
 ```
 
 ## CI/CD Pipelines
+
 ### GitHub Actions Workflow
+
 ```yaml
 name: Deploy iWORKZ Platform
 on:
@@ -315,7 +325,9 @@ jobs:
 ```
 
 ## Monitoring and Observability
+
 ### Prometheus Configuration
+
 ```yaml
 # prometheus-config.yaml
 global:
@@ -352,6 +364,7 @@ scrape_configs:
 ```
 
 ### Grafana Dashboards
+
 ```json
 {
   "dashboard": {
@@ -383,7 +396,9 @@ scrape_configs:
 ```
 
 ## Security and Compliance
+
 ### Secrets Management
+
 ```bash
 # Using SOPS for secret encryption
 sops -e -i secrets/production.yaml
@@ -395,6 +410,7 @@ vault kv put secret/iworkz/production \
 ```
 
 ### Security Scanning
+
 ```yaml
 # security-scan.yml
 name: Security Scan
@@ -415,7 +431,9 @@ jobs:
 ```
 
 ## Backup and Disaster Recovery
+
 ### Database Backup
+
 ```bash
 #!/bin/bash
 # backup-database.sh
@@ -427,6 +445,7 @@ aws s3 cp $BACKUP_NAME s3://iworkz-backups/database/
 ```
 
 ### Disaster Recovery Plan
+
 1. **RPO**: 4 hours (maximum data loss)
 2. **RTO**: 2 hours (maximum downtime)
 3. **Backup Strategy**: Automated daily backups
@@ -434,6 +453,7 @@ aws s3 cp $BACKUP_NAME s3://iworkz-backups/database/
 5. **Failover**: Automated DNS switching
 
 ## Environment Variables
+
 ```bash
 # AWS Configuration
 AWS_REGION=us-west-2
