@@ -226,28 +226,28 @@ The iWORKZ platform leverages AI throughout the stack:
 
 ## 🚀 Roadmap
 
-### Q1 2024 – Core Platform Enhancement
+### Q3 2025 – Core Platform Enhancement
 
 * [ ] Advanced analytics dashboard
 * [ ] Mobile application launch
 * [ ] Voice assistant integration
 * [ ] Expanded compliance coverage
 
-### Q2 2024 – AI & Automation
+### Q4 2025 – AI & Automation
 
 * [ ] Custom AI model training
 * [ ] Predictive placement scoring
 * [ ] Automated interview scheduling
 * [ ] Dynamic pricing optimisation
 
-### Q3 2024 – Global Expansion
+### Q1 2026 – Global Expansion
 
 * [ ] Asian market entry (Japan, South Korea)
 * [ ] Blockchain credential verification
 * [ ] Multilingual AI support
 * [ ] Enterprise SSO integration
 
-### Q4 2024 – Advanced Features
+### Q2 2026 – Advanced Features
 
 * [ ] VR/AR interview capabilities
 * [ ] Blockchain-based reputation system
