@@ -1,29 +1,33 @@
 # Deployment Guide
 
 ## Overview
+
 Comprehensive deployment guide for the iWORKZ platform, covering local development, staging, and production environments with containerized microservices architecture.
 
 ## Prerequisites
 
 ### Development Environment
-- **Operating System**: Windows 10/11 with WSL 2 or Linux/macOS
-- **Docker**: Docker Desktop 4.0+ with Kubernetes enabled
-- **Node.js**: Node.js 18+ LTS with npm/yarn
-- **Python**: Python 3.10+ with pip and virtual environments
-- **Git**: Git 2.30+ with SSH keys configured
-- **IDE**: VS Code with Remote-WSL extension (recommended)
+
+* **Operating System**: Windows 10/11 with WSL 2 or Linux/macOS
+* **Docker**: Docker Desktop 4.0+ with Kubernetes enabled
+* **Node.js**: Node.js 18+ LTS with npm/yarn
+* **Python**: Python 3.10+ with pip and virtual environments
+* **Git**: Git 2.30+ with SSH keys configured
+* **IDE**: VS Code with Remote-WSL extension (recommended)
 
 ### Production Environment
-- **Container Orchestration**: Kubernetes 1.25+ or Docker Swarm
-- **Cloud Provider**: AWS, GCP, or Azure with managed services
-- **Database**: PostgreSQL 14+ with read replicas
-- **Cache**: Redis 7+ with clustering support
-- **Load Balancer**: Application Load Balancer with SSL termination
-- **Monitoring**: Prometheus, Grafana, and centralized logging
+
+* **Container Orchestration**: Kubernetes 1.25+ or Docker Swarm
+* **Cloud Provider**: AWS, GCP, or Azure with managed services
+* **Database**: PostgreSQL 14+ with read replicas
+* **Cache**: Redis 7+ with clustering support
+* **Load Balancer**: Application Load Balancer with SSL termination
+* **Monitoring**: Prometheus, Grafana, and centralized logging
 
 ## Local Development Setup
 
 ### Quick Start
+
 ```bash
 # Clone the repository
 git clone git@github.com:your-org/iworkz-platform.git
@@ -45,6 +49,7 @@ docker-compose ps
 ```
 
 ### Environment Configuration
+
 ```bash
 # Database configuration
 DATABASE_URL=postgresql://postgres:password@localhost:5432/iworkz_dev
@@ -67,6 +72,7 @@ TWILIO_AUTH_TOKEN=your-twilio-token
 ```
 
 ### Service Dependencies
+
 ```yaml
 # docker-compose.yml structure
 version: '3.8'
@@ -117,6 +123,7 @@ volumes:
 ## Staging Environment
 
 ### Infrastructure Setup
+
 ```bash
 # Deploy to staging cluster
 kubectl apply -f k8s/staging/
@@ -136,6 +143,7 @@ kubectl get services -n iworkz-staging
 ```
 
 ### Staging Configuration
+
 ```yaml
 # staging values.yaml for Helm
 environment: staging
@@ -172,6 +180,7 @@ resources:
 ```
 
 ### Staging Validation
+
 ```bash
 # Run integration tests against staging
 npm run test:integration:staging
@@ -192,17 +201,19 @@ kubectl port-forward -n monitoring service/grafana 3000:3000
 ## Production Deployment
 
 ### Pre-Deployment Checklist
-- [ ] All tests pass in staging environment
-- [ ] Security scan completed with no critical issues
-- [ ] Database migration scripts reviewed and tested
-- [ ] Backup and rollback procedures verified
-- [ ] Performance benchmarks meet requirements
-- [ ] Security certificates updated and valid
-- [ ] Environment variables and secrets configured
-- [ ] Monitoring and alerting configured
-- [ ] Change management approval obtained
+
+* [ ] All tests pass in staging environment
+* [ ] Security scan completed with no critical issues
+* [ ] Database migration scripts reviewed and tested
+* [ ] Backup and rollback procedures verified
+* [ ] Performance benchmarks meet requirements
+* [ ] Security certificates updated and valid
+* [ ] Environment variables and secrets configured
+* [ ] Monitoring and alerting configured
+* [ ] Change management approval obtained
 
 ### Production Infrastructure
+
 ```bash
 # Production deployment using Helm
 helm upgrade --install iworkz-prod ./helm/iworkz \
@@ -224,6 +235,7 @@ kubectl top pods -n production
 ```
 
 ### Production Configuration
+
 ```yaml
 # production values.yaml
 environment: production
@@ -271,6 +283,7 @@ backup:
 ## CI/CD Pipeline
 
 ### GitHub Actions Workflow
+
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy to Production
@@ -338,6 +351,7 @@ jobs:
 ```
 
 ### Deployment Commands
+
 ```bash
 # Deploy to staging (requires approval)
 npm run deploy:staging
@@ -358,6 +372,7 @@ npm run rollback:production
 ## Monitoring and Observability
 
 ### Health Checks
+
 ```bash
 # Application health endpoints
 GET /health                 # Basic health check
@@ -388,6 +403,7 @@ GET /health/redis         # Redis connectivity and performance
 ```
 
 ### Logging Configuration
+
 ```yaml
 # Logging configuration
 logging:
@@ -410,6 +426,7 @@ logging:
 ```
 
 ### Metrics and Alerting
+
 ```yaml
 # Prometheus alerts
 groups:
@@ -438,6 +455,6 @@ groups:
 
 ## Further Reading
 
-- [Cloud Architecture](./CLOUD_ARCHITECTURE.md)
-- [Architecture Overview](../1_DOCUMENTATION/ARCHITECTURE_OVERVIEW.md)
-- [Security Protocols](../5_SECURITY/SECURITY_PROTOCOLS.md)
+* [Cloud Architecture](./CLOUD_ARCHITECTURE.md)
+* [Architecture Overview](../1_DOCUMENTATION/ARCHITECTURE_OVERVIEW.md)
+* [Security Protocols](../5_SECURITY/SECURITY_PROTOCOLS.md)
