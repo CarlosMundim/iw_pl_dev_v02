@@ -1,18 +1,21 @@
 # Notification Service
 
 ## Overview
+
 Multi-channel notification service handling email, SMS, push notifications, and in-app messaging.
 
 ## Tech Stack
-- **Framework**: Node.js + Express + TypeScript
-- **Email**: SendGrid, Amazon SES
-- **SMS**: Twilio, AWS SNS
-- **Push Notifications**: Firebase Cloud Messaging (FCM)
-- **Queue System**: Bull Queue + Redis
-- **Templates**: Handlebars.js
-- **Analytics**: Tracking delivery and engagement
+
+* **Framework**: Node.js + Express + TypeScript
+* **Email**: SendGrid, Amazon SES
+* **SMS**: Twilio, AWS SNS
+* **Push Notifications**: Firebase Cloud Messaging (FCM)
+* **Queue System**: Bull Queue + Redis
+* **Templates**: Handlebars.js
+* **Analytics**: Tracking delivery and engagement
 
 ## Development Setup
+
 ```bash
 # Install dependencies
 npm install
@@ -31,32 +34,38 @@ npm run queue:worker
 ```
 
 ## Notification Channels
+
 ### Email Notifications
-- Welcome emails and onboarding
-- Job match alerts
-- Application status updates
-- Weekly digest newsletters
-- Password reset and security alerts
+
+* Welcome emails and onboarding
+* Job match alerts
+* Application status updates
+* Weekly digest newsletters
+* Password reset and security alerts
 
 ### SMS Notifications
-- Two-factor authentication codes
-- Critical security alerts
-- Interview reminders
-- Urgent job opportunities
+
+* Two-factor authentication codes
+* Critical security alerts
+* Interview reminders
+* Urgent job opportunities
 
 ### Push Notifications
-- Real-time job matches
-- New messages and chat updates
-- Application status changes
-- Daily engagement prompts
+
+* Real-time job matches
+* New messages and chat updates
+* Application status changes
+* Daily engagement prompts
 
 ### In-App Notifications
-- Activity feed updates
-- System announcements
-- Feature announcements
-- Social interactions
+
+* Activity feed updates
+* System announcements
+* Feature announcements
+* Social interactions
 
 ## API Endpoints
+
 ```typescript
 POST /notifications/send              // Send immediate notification
 POST /notifications/schedule          // Schedule future notification
@@ -70,7 +79,9 @@ POST /notifications/preferences     // Update user preferences
 ```
 
 ## Notification Types
+
 ### Transactional
+
 ```typescript
 interface TransactionalNotification {
   type: 'transactional';
@@ -88,6 +99,7 @@ interface TransactionalNotification {
 ```
 
 ### Marketing
+
 ```typescript
 interface MarketingNotification {
   type: 'marketing';
@@ -103,7 +115,9 @@ interface MarketingNotification {
 ```
 
 ## Template System
+
 ### Email Templates
+
 ```handlebars
 <!-- job-match-alert.hbs -->
 <!DOCTYPE html>
@@ -130,6 +144,7 @@ interface MarketingNotification {
 ```
 
 ### Push Notification Templates
+
 ```typescript
 const pushTemplates = {
   jobMatch: {
@@ -153,7 +168,9 @@ const pushTemplates = {
 ```
 
 ## Queue Management
+
 ### Job Processing
+
 ```typescript
 // Add notification to queue
 const notificationQueue = new Bull('notifications', {
@@ -173,6 +190,7 @@ notificationQueue.process('send-push', async (job) => {
 ```
 
 ### Retry Logic
+
 ```typescript
 const jobOptions = {
   attempts: 3,
@@ -186,7 +204,9 @@ const jobOptions = {
 ```
 
 ## User Preferences
+
 ### Preference Management
+
 ```typescript
 interface NotificationPreferences {
   userId: string;
@@ -220,7 +240,9 @@ interface NotificationPreferences {
 ```
 
 ## Delivery Tracking
+
 ### Analytics
+
 ```typescript
 interface NotificationAnalytics {
   notificationId: string;
@@ -250,7 +272,9 @@ interface NotificationAnalytics {
 ```
 
 ## Provider Integration
+
 ### Email Providers
+
 ```typescript
 // SendGrid integration
 const sendGridClient = require('@sendgrid/mail');
@@ -269,6 +293,7 @@ const sendEmail = async (template: string, recipient: string, data: any) => {
 ```
 
 ### SMS Provider
+
 ```typescript
 // Twilio integration
 const twilio = require('twilio');
@@ -284,6 +309,7 @@ const sendSMS = async (to: string, message: string) => {
 ```
 
 ### Push Notifications
+
 ```typescript
 // Firebase Cloud Messaging
 const admin = require('firebase-admin');
@@ -305,6 +331,7 @@ const sendPushNotification = async (tokens: string[], payload: any) => {
 ```
 
 ## Environment Variables
+
 ```bash
 # Email Configuration
 SENDGRID_API_KEY=your-sendgrid-key
