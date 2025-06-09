@@ -16,7 +16,7 @@ Transform global workforce mobility through AI-powered compliance, intelligent m
   - Basic API gateway and authentication
 
 - **Compliance Engine MVP**
-  - UK, Germany, and Australia compliance rules
+  - Japan, South Korea, Singapore, Taiwan, UK, Germany, and Australia compliance rules
   - Automated job posting validation
   - Basic contract template checking
   - Real-time regulatory alerts system
@@ -159,18 +159,18 @@ Transform global workforce mobility through AI-powered compliance, intelligent m
 
 ### Geographic Expansion
 ```
-2025 Q1: UK, Germany, Australia (Foundation)
-2025 Q2: Netherlands, France, Canada (Growth)
-2025 Q3: Japan, Singapore, UAE (Asia-Pacific)
+2026 Q1: Japan (Foundation)
+2025 Q2: Netherlands, Ireland, Canada, UK, Germany, Australia, New Zealand (Growth)
+2025 Q3: Korea, Taiwan, Singapore, UAE (Asia-Pacific)
 2025 Q4: Brazil, Mexico, India (Emerging Markets)
 2026 Q1: Nordics, Eastern Europe (Regional Expansion)
 2026 Q2: South Africa, Nigeria (African Markets)
 ```
 
 ### Vertical Market Focus
-- **Healthcare**: Nurses, doctors, healthcare professionals
+- **Healthcare**: Nurses, doctors, caretakers, healthcare professionals
 - **Technology**: Software engineers, data scientists, IT professionals
-- **Engineering**: Civil, mechanical, electrical engineers
+- **Engineering**: Civil, mechanical, electrical, processing engineers
 - **Construction**: Skilled trades, project managers, safety experts
 - **Financial Services**: Analysts, compliance officers, fintech specialists
 

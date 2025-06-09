@@ -1,0 +1,93 @@
+# =============================================================================
+# iWORKZ Platform Terraform Variables Example
+# =============================================================================
+# Copy this file to terraform.tfvars and customize the values for your environment
+
+# =============================================================================
+# BASIC CONFIGURATION
+# =============================================================================
+aws_region  = "us-east-1"
+environment = "staging"  # dev, staging, production
+
+# =============================================================================
+# NETWORKING
+# =============================================================================
+vpc_cidr        = "10.0.0.0/16"
+private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
+
+# =============================================================================
+# EKS CLUSTER
+# =============================================================================
+kubernetes_version     = "1.27"
+node_instance_types    = ["t3.medium", "t3.large"]
+spot_instance_types    = ["t3.medium", "t3.large", "t3.xlarge"]
+node_group_min_size    = 2
+node_group_max_size    = 10
+node_group_desired_size = 3
+
+# =============================================================================
+# DATABASE
+# =============================================================================
+postgres_version           = "15.3"
+postgres_instance_class    = "db.t3.small"
+postgres_allocated_storage = 20
+postgres_max_allocated_storage = 100
+postgres_username          = "iworkz_admin"
+postgres_password          = "your_secure_database_password_here"
+
+# =============================================================================
+# REDIS
+# =============================================================================
+redis_version           = "7.0"
+redis_node_type         = "cache.t3.small"
+redis_num_cache_clusters = 2
+redis_auth_token        = "your_secure_redis_auth_token_here"
+
+# =============================================================================
+# DOMAIN AND SSL
+# =============================================================================
+domain_name     = "staging.iworkz.com"
+certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/12345678-1234-1234-1234-123456789012"
+
+# =============================================================================
+# MONITORING AND LOGGING
+# =============================================================================
+enable_monitoring   = true
+log_retention_days  = 30
+
+# =============================================================================
+# BACKUP CONFIGURATION
+# =============================================================================
+backup_retention_period = 7
+backup_window          = "03:00-04:00"
+maintenance_window     = "sun:04:00-sun:05:00"
+
+# =============================================================================
+# SCALING CONFIGURATION
+# =============================================================================
+enable_autoscaling = true
+min_replicas      = 2
+max_replicas      = 10
+
+# =============================================================================
+# SECURITY CONFIGURATION
+# =============================================================================
+enable_encryption         = true
+enable_deletion_protection = false  # Set to true for production
+
+# =============================================================================
+# FEATURE FLAGS
+# =============================================================================
+enable_spot_instances        = true   # For cost optimization
+enable_multi_az              = false  # Set to true for production
+enable_performance_insights  = false  # Set to true for production
+
+# =============================================================================
+# ADDITIONAL TAGS
+# =============================================================================
+additional_tags = {
+  Owner       = "DevOps Team"
+  CostCenter  = "Engineering"
+  Project     = "iWORKZ Platform"
+}
