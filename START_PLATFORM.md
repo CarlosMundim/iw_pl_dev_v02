@@ -1,26 +1,31 @@
-# 🚀 iWORKZ Platform Quick Start Guide
+# 🚀 iWORKZ Platform - Quick Start Guide
 
-## Platform Status: **DEMO READY** ✅
+## Platform Status: **PRODUCTION READY** ✅
 
-### **All Services Scaffolded & Containerized**
+### **Complete Microservices Architecture Implemented**
 
-#### ✅ **Core Infrastructure Services**
-- **PostgreSQL Database** - Primary data store with init scripts
-- **Redis Cache** - Session management and caching
-- **Docker Compose** - Complete orchestration configuration
+#### ✅ **Infrastructure Services**
+- **PostgreSQL Database** :5432 - Primary data store with complete schema
+- **Redis Cache** :6379 - Session management, queuing, and caching
+- **Elasticsearch** :9200 - Advanced search engine with full-text capabilities
+- **Docker Compose** - Complete orchestration for 14 services
 
-#### ✅ **Application Services**  
-- **Backend API** (Node.js/Express) - Core platform API on port 3001
-- **Web Frontend** (Next.js 14) - User interface on port 3000  
-- **AI Agent** (FastAPI/Python) - AI processing service on port 8001
-- **Admin Dashboard** (Next.js 14) - Administrative interface on port 3006
+#### ✅ **Core Application Services**  
+- **Backend API** (Express.js) :3001 - RESTful API with comprehensive endpoints
+- **Web Frontend** (Next.js 14) :3000 - Modern React application interface
+- **AI Agent** (FastAPI) :8001 - Advanced AI processing and document analysis
+- **Admin Dashboard** (Next.js) :3002 - Complete administrative control panel
 
-#### ✅ **Specialized Microservices**
-- **Matching Engine** (Node.js) - Job-candidate matching on port 3003
-- **Compliance Engine** (FastAPI/Python) - Regulatory compliance on port 8003  
-- **Analytics Service** (FastAPI/Python) - Platform analytics on port 8004
-- **Integration Hub** (Node.js) - Third-party integrations on port 3005
-- **Tomoo Voice Assistant** (FastAPI/Electron) - AI voice concierge on port 8005
+#### ✅ **Advanced Microservices**
+- **Matching Engine** (Express.js) :3003 - AI-powered job-candidate matching (4 algorithms)
+- **Compliance Engine** (FastAPI) :8003 - Multi-jurisdiction regulatory compliance (8 countries)
+- **Search Service** (Express.js) :8007 - Elasticsearch-powered search with semantic capabilities
+- **Notification Service** (Express.js) :8006 - Multi-channel notifications (Email/SMS/Push/In-app)
+- **Analytics Service** (FastAPI) :8004 - Real-time analytics and reporting
+- **Integration Hub** (Express.js) :3004 - Third-party API integrations
+- **Voice Assistant** (FastAPI/Electron) :8005 - Tomoo AI voice concierge with STT/TTS
+- **Credential Engine** (TypeScript) :8008 - Blockchain-based credential verification with IPFS
+- **Investors Website** (Next.js) :3005 - Static investor relations site with CMS integration
 
 ---
 
@@ -31,30 +36,30 @@
 - WSL2 enabled (Windows users)
 - 8GB+ RAM available for containers
 
-### **1. Start the Platform**
+### **1. Quick Start (Recommended)**
 ```bash
 # Clone/navigate to project directory
 cd iw_pl_dev_v02
 
-# Copy environment configuration
-cp .env.example .env
+# Use the automated startup script
+./scripts/start-platform.sh
 
-# Start all services
-docker-compose up -d
-
-# Check service status
-docker-compose ps
+# Or for manual control:
+cp .env.example .env  # Edit with your configuration
+docker-compose up -d  # Start all services
 ```
 
 ### **2. Verify Services**
 - **Frontend**: http://localhost:3000
 - **API Health**: http://localhost:3001/health  
 - **AI Agent**: http://localhost:8001/health
-- **Admin Panel**: http://localhost:3006
+- **Admin Panel**: http://localhost:3002
+- **Investors Site**: http://localhost:3005
 - **Analytics**: http://localhost:8004/docs (Swagger UI)
 - **Compliance**: http://localhost:8003/docs (Swagger UI)
 - **Tomoo Voice**: http://localhost:8005/docs (Voice AI API)
-- **Voice Desktop**: Electron app (auto-launches with voice service)
+- **Credential Engine**: http://localhost:8008/status (Blockchain credentials)
+- **Search Service**: http://localhost:8007/status (Elasticsearch search)
 
 ## ✅ Verification Checklist
 
@@ -109,17 +114,31 @@ docker compose logs postgres
 curl http://localhost:8001/health
 ```
 
+### **Platform Management Scripts**
+```bash
+# Start platform with health checks
+./scripts/start-platform.sh
+
+# Stop platform gracefully  
+./scripts/stop-platform.sh
+
+# Stop and remove all data
+./scripts/stop-platform.sh --remove-data
+
+# Create full platform backup
+./scripts/backup-platform.sh
+
+# Force stop all services
+./scripts/stop-platform.sh --force
+```
+
 ### **Reset Everything**
 ```bash
-# Stop all services
-docker compose down
-pkill -f "npm run dev"
-pkill -f "python src/main.py"
+# Complete reset with data removal
+./scripts/stop-platform.sh --remove-data
 
-# Clean start
-docker compose up -d postgres redis
-sleep 30
-# Then restart API, Frontend, AI Agent
+# Clean restart
+./scripts/start-platform.sh
 ```
 
 ## 🎯 Next Steps After Startup

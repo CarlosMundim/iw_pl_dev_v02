@@ -1,0 +1,315 @@
+# =============================================================================
+# AlertManager Deployment for Kubernetes
+# =============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: iworkz-monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: iworkz-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: alertmanager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: alertmanager
+        app.kubernetes.io/component: monitoring
+    spec:
+      serviceAccountName: alertmanager-service-account
+      containers:
+        - name: alertmanager
+          image: prom/alertmanager:v0.26.0
+          ports:
+            - name: web
+              containerPort: 9093
+          args:
+            - '--config.file=/etc/alertmanager/alertmanager.yml'
+            - '--storage.path=/alertmanager'
+            - '--data.retention=120h'
+            - '--web.listen-address=0.0.0.0:9093'
+            - '--web.external-url=https://monitoring.iworkz.com/alertmanager'
+            - '--web.route-prefix=/alertmanager'
+            - '--cluster.listen-address=0.0.0.0:9094'
+            - '--cluster.advertise-address=$(POD_IP):9094'
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          volumeMounts:
+            - name: alertmanager-config
+              mountPath: /etc/alertmanager
+            - name: alertmanager-storage
+              mountPath: /alertmanager
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: web
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: web
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 65534
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: alertmanager-config
+          configMap:
+            name: alertmanager-config
+        - name: alertmanager-storage
+          persistentVolumeClaim:
+            claimName: alertmanager-storage-pvc
+      securityContext:
+        fsGroup: 65534
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app.kubernetes.io/name
+                      operator: In
+                      values:
+                        - alertmanager
+                topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager-service
+  namespace: iworkz-monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: monitoring
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9093
+      targetPort: web
+      protocol: TCP
+      name: web
+    - port: 9094
+      targetPort: 9094
+      protocol: TCP
+      name: cluster
+  selector:
+    app.kubernetes.io/name: alertmanager
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: alertmanager-service-account
+  namespace: iworkz-monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: service-account
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: alertmanager-storage-pvc
+  namespace: iworkz-monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: gp3
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager-config
+  namespace: iworkz-monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: config
+data:
+  alertmanager.yml: |
+    global:
+      smtp_smarthost: 'smtp.gmail.com:587'
+      smtp_from: 'alerts@iworkz.com'
+      smtp_auth_username: 'alerts@iworkz.com'
+      smtp_auth_password: 'app_password_here'
+      smtp_require_tls: true
+      
+      # Slack webhook URL
+      slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+
+    # Templates for notifications
+    templates:
+      - '/etc/alertmanager/templates/*.tmpl'
+
+    # Route tree for alerts
+    route:
+      group_by: ['alertname', 'cluster', 'service']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 1h
+      receiver: 'web.hook'
+      routes:
+        # Critical alerts go to both email and Slack
+        - match:
+            severity: critical
+          receiver: 'critical-alerts'
+          group_wait: 0s
+          repeat_interval: 5m
+        
+        # Warning alerts go to Slack only
+        - match:
+            severity: warning
+          receiver: 'warning-alerts'
+          group_wait: 30s
+          repeat_interval: 30m
+        
+        # Infrastructure alerts
+        - match:
+            service: kubernetes
+          receiver: 'infrastructure-alerts'
+        
+        # Application alerts
+        - match_re:
+            service: ^(backend-api|ai-agent|web-frontend)$
+          receiver: 'application-alerts'
+
+    # Inhibit rules
+    inhibit_rules:
+      - source_match:
+          severity: 'critical'
+        target_match:
+          severity: 'warning'
+        equal: ['alertname', 'dev', 'instance']
+
+    # Receivers configuration
+    receivers:
+      - name: 'web.hook'
+        webhook_configs:
+          - url: 'http://localhost:5001/'
+
+      - name: 'critical-alerts'
+        email_configs:
+          - to: 'ops@iworkz.com'
+            subject: 'CRITICAL: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+            body: |
+              {{ range .Alerts }}
+              Alert: {{ .Annotations.summary }}
+              Description: {{ .Annotations.description }}
+              Instance: {{ .Labels.instance }}
+              Severity: {{ .Labels.severity }}
+              Time: {{ .StartsAt }}
+              {{ end }}
+        slack_configs:
+          - channel: '#alerts-critical'
+            title: 'Critical Alert - iWORKZ Platform'
+            text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+            color: 'danger'
+            send_resolved: true
+
+      - name: 'warning-alerts'
+        slack_configs:
+          - channel: '#alerts-warning'
+            title: 'Warning Alert - iWORKZ Platform'
+            text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+            color: 'warning'
+            send_resolved: true
+
+      - name: 'infrastructure-alerts'
+        email_configs:
+          - to: 'devops@iworkz.com'
+            subject: 'Infrastructure Alert: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+            body: |
+              Infrastructure Alert Details:
+              {{ range .Alerts }}
+              Alert: {{ .Annotations.summary }}
+              Description: {{ .Annotations.description }}
+              Node: {{ .Labels.instance }}
+              Severity: {{ .Labels.severity }}
+              {{ end }}
+        slack_configs:
+          - channel: '#infrastructure'
+            title: 'Infrastructure Alert'
+            text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+
+      - name: 'application-alerts'
+        email_configs:
+          - to: 'developers@iworkz.com'
+            subject: 'Application Alert: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+            body: |
+              Application Alert Details:
+              {{ range .Alerts }}
+              Service: {{ .Labels.service }}
+              Alert: {{ .Annotations.summary }}
+              Description: {{ .Annotations.description }}
+              Instance: {{ .Labels.instance }}
+              {{ end }}
+        slack_configs:
+          - channel: '#development'
+            title: 'Application Alert'
+            text: '{{ range .Alerts }}Service: {{ .Labels.service }} - {{ .Annotations.summary }}{{ end }}'
+
+  # Custom message templates
+  templates.tmpl: |
+    {{ define "slack.default.title" }}
+    [{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .GroupLabels.SortedPairs.Values | join " " }} {{ if gt (len .GroupLabels) 0 }}({{ range .GroupLabels.SortedPairs }}{{ .Name }}={{ .Value }} {{ end }}){{ end }}
+    {{ end }}
+
+    {{ define "slack.default.text" }}
+    {{ range .Alerts -}}
+    *Alert:* {{ .Annotations.title }}{{ if .Labels.severity }} - `{{ .Labels.severity }}`{{ end }}
+    *Description:* {{ .Annotations.description }}
+    *Details:*
+      {{ range .Labels.SortedPairs }} • *{{ .Name }}:* `{{ .Value }}`
+      {{ end }}
+    {{ end }}
+    {{ end }}
+
+---
+# Service Monitor for AlertManager (to be scraped by Prometheus)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: alertmanager-service-monitor
+  namespace: iworkz-monitoring
+  labels:
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: alertmanager
+  endpoints:
+    - port: web
+      interval: 30s
+      path: /metrics

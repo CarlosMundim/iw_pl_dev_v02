@@ -1,0 +1,33 @@
+# =============================================================================
+# iWORKZ Platform Kubernetes Namespaces
+# =============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: iworkz-platform
+  labels:
+    name: iworkz-platform
+    app.kubernetes.io/name: iworkz
+    app.kubernetes.io/component: platform
+    app.kubernetes.io/part-of: iworkz-platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: iworkz-monitoring
+  labels:
+    name: iworkz-monitoring
+    app.kubernetes.io/name: iworkz
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: iworkz-platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: iworkz-ingress
+  labels:
+    name: iworkz-ingress
+    app.kubernetes.io/name: iworkz
+    app.kubernetes.io/component: ingress
+    app.kubernetes.io/part-of: iworkz-platform

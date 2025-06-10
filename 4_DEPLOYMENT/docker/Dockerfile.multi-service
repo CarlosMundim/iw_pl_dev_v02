@@ -1,0 +1,179 @@
+# Multi-Service Dockerfile for iWORKZ Platform
+# This Dockerfile can build any Node.js service with appropriate build args
+
+# ============================================
+# Build Arguments
+# ============================================
+ARG NODE_VERSION=18
+ARG SERVICE_NAME=backend-api
+ARG BUILD_ENV=production
+
+# ============================================
+# Base Stage - Common dependencies
+# ============================================
+FROM node:${NODE_VERSION}-alpine AS base
+
+# Install system dependencies
+RUN apk add --no-cache \
+    dumb-init \
+    curl \
+    bash \
+    git \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/cache/apk/*
+
+# Create app user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 -G nodejs
+
+# Set working directory
+WORKDIR /app
+
+# ============================================
+# Dependencies Stage
+# ============================================
+FROM base AS dependencies
+
+ARG SERVICE_NAME
+
+# Copy package files
+COPY 2_SERVICES/${SERVICE_NAME}/package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# ============================================
+# Build Stage
+# ============================================
+FROM base AS build
+
+ARG SERVICE_NAME
+
+# Copy package files
+COPY 2_SERVICES/${SERVICE_NAME}/package*.json ./
+
+# Install all dependencies (including dev)
+RUN npm ci && npm cache clean --force
+
+# Copy source code
+COPY 2_SERVICES/${SERVICE_NAME}/ ./
+
+# Build the application (if build script exists)
+RUN if [ -f package.json ] && npm run | grep -q "build"; then npm run build; fi
+
+# ============================================
+# Production Stage
+# ============================================
+FROM base AS production
+
+ARG SERVICE_NAME
+ARG BUILD_ENV
+
+# Set environment variables
+ENV NODE_ENV=${BUILD_ENV}
+ENV SERVICE_NAME=${SERVICE_NAME}
+
+# Copy production dependencies
+COPY --from=dependencies --chown=nodejs:nodejs /app/node_modules ./node_modules
+
+# Copy built application
+COPY --from=build --chown=nodejs:nodejs /app ./
+
+# Create necessary directories
+RUN mkdir -p logs tmp uploads && \
+    chown -R nodejs:nodejs logs tmp uploads
+
+# Switch to non-root user
+USER nodejs
+
+# Expose default port (can be overridden)
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:3000/health || exit 1
+
+# Start the application
+CMD ["dumb-init", "node", "src/server.js"]
+
+# ============================================
+# Development Stage
+# ============================================
+FROM base AS development
+
+ARG SERVICE_NAME
+
+# Copy package files
+COPY 2_SERVICES/${SERVICE_NAME}/package*.json ./
+
+# Install all dependencies
+RUN npm ci && npm cache clean --force
+
+# Copy source code
+COPY 2_SERVICES/${SERVICE_NAME}/ ./
+
+# Set development environment
+ENV NODE_ENV=development
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port and debugger port
+EXPOSE 3000 9229
+
+# Start with nodemon for development
+CMD ["npm", "run", "dev"]
+
+# ============================================
+# Testing Stage
+# ============================================
+FROM build AS test
+
+ARG SERVICE_NAME
+
+# Set test environment
+ENV NODE_ENV=test
+ENV CI=true
+
+# Run tests
+CMD ["npm", "test"]
+
+# ============================================
+# Labels and Metadata
+# ============================================
+ARG BUILD_VERSION=latest
+ARG BUILD_DATE
+ARG GIT_COMMIT
+
+LABEL maintainer="iWORKZ Development Team <dev@iworkz.jp>" \
+      version="${BUILD_VERSION}" \
+      service="${SERVICE_NAME}" \
+      description="iWORKZ Platform Service - ${SERVICE_NAME}" \
+      build-date="${BUILD_DATE}" \
+      git-commit="${GIT_COMMIT}" \
+      org.opencontainers.image.title="iWORKZ ${SERVICE_NAME}" \
+      org.opencontainers.image.description="AI-powered employment platform service" \
+      org.opencontainers.image.version="${BUILD_VERSION}" \
+      org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.revision="${GIT_COMMIT}" \
+      org.opencontainers.image.vendor="iWORKZ株式会社" \
+      org.opencontainers.image.licenses="Proprietary"
+
+# ============================================
+# Usage Examples:
+# ============================================
+#
+# Build backend API:
+# docker build -f Dockerfile.multi-service --build-arg SERVICE_NAME=backend-api -t iworkz/backend-api:latest .
+#
+# Build AI agent:
+# docker build -f Dockerfile.multi-service --build-arg SERVICE_NAME=ai-agent -t iworkz/ai-agent:latest .
+#
+# Build for development:
+# docker build -f Dockerfile.multi-service --target development --build-arg SERVICE_NAME=backend-api -t iworkz/backend-api:dev .
+#
+# Build with specific Node version:
+# docker build -f Dockerfile.multi-service --build-arg NODE_VERSION=18 --build-arg SERVICE_NAME=web-frontend -t iworkz/web-frontend:latest .
+# ============================================

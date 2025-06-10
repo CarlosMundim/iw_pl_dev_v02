@@ -1,0 +1,248 @@
+# =============================================================================
+# iWORKZ Platform ConfigMaps
+# =============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: iworkz-config
+  namespace: iworkz-platform
+  labels:
+    app.kubernetes.io/name: iworkz
+    app.kubernetes.io/component: config
+data:
+  # Environment Configuration
+  NODE_ENV: "production"
+  ENVIRONMENT: "kubernetes"
+  
+  # Logging Configuration
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+  
+  # Rate Limiting
+  RATE_LIMIT_WINDOW: "900000"  # 15 minutes
+  RATE_LIMIT_MAX: "1000"
+  
+  # Cache Configuration
+  CACHE_TTL: "3600"  # 1 hour
+  
+  # AI Configuration
+  MODEL_CACHE_TTL: "3600"
+  MAX_CONCURRENT_REQUESTS: "10"
+  
+  # Analytics Configuration
+  ANALYTICS_BATCH_SIZE: "1000"
+  REPORTING_SCHEDULE: "0 6 * * *"
+  
+  # Email Configuration
+  EMAIL_RATE_LIMIT: "100"
+  SMS_RATE_LIMIT: "50"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: iworkz-platform
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: database
+data:
+  POSTGRES_DB: "iworkz"
+  POSTGRES_USER: "iworkz_user"
+  # Connection pool settings
+  PGPOOL_MAX_POOL: "25"
+  PGPOOL_DEFAULT_POOL: "25"
+  PGPOOL_RESERVE_POOL: "5"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+  namespace: iworkz-platform
+  labels:
+    app.kubernetes.io/name: redis
+    app.kubernetes.io/component: cache
+data:
+  redis.conf: |
+    # Redis Configuration for iWORKZ Platform
+    
+    # Memory Management
+    maxmemory 512mb
+    maxmemory-policy allkeys-lru
+    
+    # Persistence
+    save 900 1
+    save 300 10
+    save 60 10000
+    
+    # Network
+    timeout 0
+    tcp-keepalive 300
+    tcp-backlog 511
+    
+    # Clients
+    maxclients 10000
+    
+    # Security
+    requirepass ${REDIS_PASSWORD}
+    
+    # Logging
+    loglevel notice
+    
+    # Performance
+    hash-max-ziplist-entries 512
+    hash-max-ziplist-value 64
+    list-max-ziplist-size -2
+    list-compress-depth 0
+    set-max-intset-entries 512
+    zset-max-ziplist-entries 128
+    zset-max-ziplist-value 64
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: iworkz-platform
+  labels:
+    app.kubernetes.io/name: nginx
+    app.kubernetes.io/component: reverse-proxy
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes auto;
+    error_log /var/log/nginx/error.log warn;
+    pid /var/run/nginx.pid;
+    
+    events {
+        worker_connections 1024;
+        use epoll;
+        multi_accept on;
+    }
+    
+    http {
+        include /etc/nginx/mime.types;
+        default_type application/octet-stream;
+        
+        # Logging
+        log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                        '$status $body_bytes_sent "$http_referer" '
+                        '"$http_user_agent" "$http_x_forwarded_for" '
+                        'rt=$request_time uct="$upstream_connect_time" '
+                        'uht="$upstream_header_time" urt="$upstream_response_time"';
+        
+        access_log /var/log/nginx/access.log main;
+        
+        # Basic Settings
+        sendfile on;
+        tcp_nopush on;
+        tcp_nodelay on;
+        keepalive_timeout 65;
+        types_hash_max_size 2048;
+        server_tokens off;
+        client_max_body_size 50M;
+        
+        # Gzip
+        gzip on;
+        gzip_vary on;
+        gzip_min_length 1024;
+        gzip_proxied any;
+        gzip_comp_level 6;
+        gzip_types
+            text/plain
+            text/css
+            text/xml
+            text/javascript
+            application/json
+            application/javascript
+            application/xml+rss
+            application/atom+xml
+            image/svg+xml;
+        
+        # Rate Limiting
+        limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+        limit_req_zone $binary_remote_addr zone=auth:10m rate=5r/s;
+        limit_req_zone $binary_remote_addr zone=upload:10m rate=2r/s;
+        
+        # Security Headers
+        add_header X-Frame-Options DENY always;
+        add_header X-Content-Type-Options nosniff always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        
+        # Upstream definitions
+        upstream backend_api {
+            least_conn;
+            server backend-api-service:3000 max_fails=3 fail_timeout=30s;
+            keepalive 32;
+        }
+        
+        upstream ai_agent {
+            least_conn;
+            server ai-agent-service:8000 max_fails=3 fail_timeout=30s;
+            keepalive 16;
+        }
+        
+        upstream web_frontend {
+            least_conn;
+            server web-frontend-service:3000 max_fails=3 fail_timeout=30s;
+            keepalive 32;
+        }
+        
+        # Default server
+        server {
+            listen 80 default_server;
+            server_name _;
+            
+            # Health check
+            location /health {
+                access_log off;
+                return 200 "OK\n";
+                add_header Content-Type text/plain;
+            }
+            
+            # API proxy
+            location /api/ {
+                limit_req zone=api burst=20 nodelay;
+                
+                proxy_pass http://backend_api/;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                
+                proxy_connect_timeout 30s;
+                proxy_send_timeout 60s;
+                proxy_read_timeout 60s;
+            }
+            
+            # AI Agent proxy
+            location /ai/ {
+                proxy_pass http://ai_agent/;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                
+                proxy_connect_timeout 60s;
+                proxy_send_timeout 180s;
+                proxy_read_timeout 180s;
+            }
+            
+            # Frontend
+            location / {
+                proxy_pass http://web_frontend;
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                
+                # WebSocket support
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+            }
+        }
+    }

@@ -1,0 +1,334 @@
+name: Infrastructure Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: [ 
+      '4_DEPLOYMENT/**',
+      'docker-compose.yml',
+      '2_SERVICES/*/Dockerfile',
+      'scripts/**'
+    ]
+  pull_request:
+    branches: [ main, develop ]
+    paths: [ 
+      '4_DEPLOYMENT/**',
+      'docker-compose.yml',
+      '2_SERVICES/*/Dockerfile',
+      'scripts/**'
+    ]
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+
+jobs:
+  # =============================================================================
+  # INFRASTRUCTURE VALIDATION
+  # =============================================================================
+  validate-docker:
+    name: Validate Docker Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate main docker-compose.yml
+        run: |
+          docker-compose -f docker-compose.yml config
+
+      - name: Validate staging docker-compose.yml
+        run: |
+          docker-compose -f 4_DEPLOYMENT/staging/docker-compose.staging.yml config
+
+      - name: Lint Dockerfiles
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: 2_SERVICES/backend-api/Dockerfile
+          format: sarif
+          output-file: hadolint-backend.sarif
+
+      - name: Upload Hadolint results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: hadolint-backend.sarif
+
+      - name: Test Docker builds
+        run: |
+          # Test building key services
+          docker build -t test-backend 2_SERVICES/backend-api/
+          docker build -t test-ai-agent 2_SERVICES/ai-agent/
+          docker build -t test-frontend 2_SERVICES/web-frontend/
+
+  validate-infrastructure:
+    name: Validate Infrastructure Scripts
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get install shellcheck
+
+      - name: Validate shell scripts
+        run: |
+          find . -name "*.sh" -exec shellcheck {} \;
+
+      - name: Validate deployment scripts
+        run: |
+          # Check script permissions
+          test -x 4_DEPLOYMENT/staging/deploy-staging.sh
+          test -x scripts/validate-platform.sh
+          test -x scripts/run-full-validation.sh
+
+      - name: Validate environment files
+        run: |
+          # Check required environment variables are defined
+          grep -q "POSTGRES_PASSWORD" 4_DEPLOYMENT/staging/.env.staging
+          grep -q "JWT_SECRET" 4_DEPLOYMENT/staging/.env.staging
+          grep -q "API_KEY" 4_DEPLOYMENT/staging/.env.staging
+
+  # =============================================================================
+  # PLATFORM VALIDATION
+  # =============================================================================
+  platform-health-check:
+    name: Platform Health Validation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install validation dependencies
+        run: |
+          pip install requests pytest python-dotenv
+
+      - name: Run platform validation (if staging exists)
+        run: |
+          if curl -s https://staging-api.iworkz.com/health > /dev/null; then
+            cd tests/e2e
+            python test_platform_e2e.py --base-url=https://staging-api.iworkz.com
+          else
+            echo "Staging environment not available, skipping validation"
+          fi
+
+      - name: Run integration tests (if staging exists)
+        run: |
+          if curl -s https://staging-api.iworkz.com/health > /dev/null; then
+            cd tests/integration
+            python test_api_integration.py --base-url=https://staging-api.iworkz.com
+          else
+            echo "Staging environment not available, skipping integration tests"
+          fi
+
+  # =============================================================================
+  # SECURITY VALIDATION
+  # =============================================================================
+  security-validation:
+    name: Security Configuration Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for secrets in code
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+
+      - name: Validate Nginx configuration
+        run: |
+          # Install nginx for config validation
+          sudo apt-get update
+          sudo apt-get install nginx
+          
+          # Test nginx config syntax
+          sudo nginx -t -c $(pwd)/4_DEPLOYMENT/staging/nginx/nginx.conf
+
+      - name: Check SSL configuration
+        run: |
+          # Validate SSL configuration in nginx
+          grep -q "ssl_protocols TLSv1.2 TLSv1.3" 4_DEPLOYMENT/staging/nginx/nginx.conf
+          grep -q "ssl_ciphers" 4_DEPLOYMENT/staging/nginx/nginx.conf
+
+      - name: Validate security headers
+        run: |
+          # Check for security headers in nginx config
+          grep -q "X-Frame-Options" 4_DEPLOYMENT/staging/nginx/conf.d/staging.conf
+          grep -q "X-Content-Type-Options" 4_DEPLOYMENT/staging/nginx/conf.d/staging.conf
+          grep -q "Content-Security-Policy" 4_DEPLOYMENT/staging/nginx/conf.d/staging.conf
+
+  # =============================================================================
+  # MONITORING VALIDATION
+  # =============================================================================
+  monitoring-validation:
+    name: Validate Monitoring Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Prometheus configuration
+        run: |
+          # Download promtool
+          curl -LO https://github.com/prometheus/prometheus/releases/download/v2.47.0/prometheus-2.47.0.linux-amd64.tar.gz
+          tar xvf prometheus-2.47.0.linux-amd64.tar.gz
+          
+          # Validate prometheus config
+          ./prometheus-2.47.0.linux-amd64/promtool check config 2_SERVICES/monitoring/prometheus/prometheus.yml
+
+      - name: Validate Grafana provisioning
+        run: |
+          # Check if grafana provisioning files exist
+          test -f 2_SERVICES/monitoring/grafana/provisioning/datasources/prometheus.yml
+          test -f 2_SERVICES/monitoring/grafana/provisioning/dashboards/dashboard.yml
+
+      - name: Test monitoring endpoints
+        run: |
+          # Test if monitoring configurations are valid
+          python3 << 'EOF'
+          import yaml
+          import json
+          
+          # Test prometheus config
+          with open('2_SERVICES/monitoring/prometheus/prometheus.yml', 'r') as f:
+              prometheus_config = yaml.safe_load(f)
+              assert 'global' in prometheus_config
+              assert 'scrape_configs' in prometheus_config
+              print("✅ Prometheus config is valid")
+          
+          # Test grafana datasource config
+          with open('2_SERVICES/monitoring/grafana/provisioning/datasources/prometheus.yml', 'r') as f:
+              datasource_config = yaml.safe_load(f)
+              assert 'datasources' in datasource_config
+              print("✅ Grafana datasource config is valid")
+          EOF
+
+  # =============================================================================
+  # PERFORMANCE VALIDATION
+  # =============================================================================
+  performance-validation:
+    name: Performance Configuration Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate resource limits
+        run: |
+          # Check Docker Compose resource limits
+          python3 << 'EOF'
+          import yaml
+          
+          with open('4_DEPLOYMENT/staging/docker-compose.staging.yml', 'r') as f:
+              compose_config = yaml.safe_load(f)
+              
+              services_with_limits = []
+              for service_name, service_config in compose_config['services'].items():
+                  if 'deploy' in service_config and 'resources' in service_config['deploy']:
+                      limits = service_config['deploy']['resources'].get('limits', {})
+                      if 'memory' in limits and 'cpus' in limits:
+                          services_with_limits.append(service_name)
+              
+              print(f"✅ {len(services_with_limits)} services have resource limits configured")
+              
+              # Ensure critical services have limits
+              critical_services = ['postgres', 'redis', 'backend-api', 'ai-agent', 'web-frontend']
+              for service in critical_services:
+                  if service in services_with_limits:
+                      print(f"✅ {service} has resource limits")
+                  else:
+                      print(f"⚠️  {service} missing resource limits")
+          EOF
+
+      - name: Validate caching configuration
+        run: |
+          # Check Redis configuration
+          if [ -f "2_SERVICES/redis/redis.conf" ]; then
+              grep -q "maxmemory" 2_SERVICES/redis/redis.conf && echo "✅ Redis memory limit configured"
+              grep -q "maxmemory-policy" 2_SERVICES/redis/redis.conf && echo "✅ Redis eviction policy configured"
+          fi
+
+      - name: Validate database configuration
+        run: |
+          # Check PostgreSQL configuration in docker-compose
+          grep -q "shared_buffers" 4_DEPLOYMENT/staging/docker-compose.staging.yml || echo "⚠️  Consider adding PostgreSQL performance tuning"
+
+  # =============================================================================
+  # NOTIFICATION
+  # =============================================================================
+  notify-validation-results:
+    name: Notify Validation Results
+    runs-on: ubuntu-latest
+    needs: [
+      validate-docker,
+      validate-infrastructure, 
+      platform-health-check,
+      security-validation,
+      monitoring-validation,
+      performance-validation
+    ]
+    if: always()
+    
+    steps:
+      - name: Determine overall status
+        id: status
+        run: |
+          if [[ "${{ needs.validate-docker.result }}" == "success" && \
+                "${{ needs.validate-infrastructure.result }}" == "success" && \
+                "${{ needs.security-validation.result }}" == "success" && \
+                "${{ needs.monitoring-validation.result }}" == "success" && \
+                "${{ needs.performance-validation.result }}" == "success" ]]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+            echo "message=✅ All infrastructure validations passed" >> $GITHUB_OUTPUT
+          else
+            echo "status=failure" >> $GITHUB_OUTPUT
+            echo "message=❌ Some infrastructure validations failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify team
+        if: github.event_name == 'schedule' || github.ref == 'refs/heads/main'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              attachments: [{
+                color: '${{ steps.status.outputs.status }}' === 'success' ? 'good' : 'danger',
+                title: 'Infrastructure Validation Results',
+                text: '${{ steps.status.outputs.message }}',
+                fields: [{
+                  title: 'Repository',
+                  value: '${{ github.repository }}',
+                  short: true
+                }, {
+                  title: 'Branch',
+                  value: '${{ github.ref }}',
+                  short: true
+                }, {
+                  title: 'Commit',
+                  value: '${{ github.sha }}',
+                  short: true
+                }, {
+                  title: 'Trigger',
+                  value: '${{ github.event_name }}',
+                  short: true
+                }]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}

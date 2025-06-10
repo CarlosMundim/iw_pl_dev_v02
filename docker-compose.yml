@@ -264,6 +264,188 @@ services:
       - iworkz-network
     restart: unless-stopped
 
+  # Notification Service
+  notification-service:
+    build: ./2_SERVICES/notification-service
+    container_name: iworkz-notifications
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - NOTIFICATION_PORT=${NOTIFICATION_PORT}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - FROM_NAME=${FROM_NAME}
+    ports:
+      - "${NOTIFICATION_PORT}:${NOTIFICATION_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./2_SERVICES/notification-service:/app
+      - /app/node_modules
+      - notification_templates:/app/templates
+    networks:
+      - iworkz-network
+    restart: unless-stopped
+
+  # Search Service (Elasticsearch)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: iworkz-elasticsearch
+    environment:
+      - node.name=es01
+      - cluster.name=iworkz-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - iworkz-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  search-service:
+    build: ./2_SERVICES/search
+    container_name: iworkz-search
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - SEARCH_PORT=${SEARCH_PORT}
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "${SEARCH_PORT}:${SEARCH_PORT}"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./2_SERVICES/search:/app
+      - /app/node_modules
+    networks:
+      - iworkz-network
+    restart: unless-stopped
+
+  # Credential Engine (Blockchain)
+  credential-engine:
+    build: ./2_SERVICES/credential-engine
+    container_name: iworkz-credentials
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - CREDENTIAL_PORT=${CREDENTIAL_PORT}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - MONGODB_URI=mongodb://mongo:27017/iworkz_credentials
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - DEFAULT_CHAIN=sepolia
+      - PRIVATE_KEY=${BLOCKCHAIN_PRIVATE_KEY}
+      - ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
+      - SEPOLIA_RPC_URL=${SEPOLIA_RPC_URL}
+      - POLYGON_RPC_URL=${POLYGON_RPC_URL}
+      - MUMBAI_RPC_URL=${MUMBAI_RPC_URL}
+      - IPFS_API_URL=${IPFS_API_URL}
+      - IPFS_GATEWAY=${IPFS_GATEWAY}
+      - ISSUER_ADDRESS=${ISSUER_ADDRESS}
+    ports:
+      - "${CREDENTIAL_PORT}:${CREDENTIAL_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./2_SERVICES/credential-engine:/app
+      - /app/node_modules
+      - credential_uploads:/app/uploads
+    networks:
+      - iworkz-network
+    restart: unless-stopped
+
+  # MongoDB for Credential Engine
+  mongo:
+    image: mongo:7-jammy
+    container_name: iworkz-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: iworkz_credentials
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    networks:
+      - iworkz-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Investors Website
+  investors-website:
+    build: ./2_SERVICES/investors-website
+    container_name: iworkz-investors
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - INVESTORS_PORT=${INVESTORS_PORT}
+      - SITE_URL=${INVESTORS_SITE_URL}
+      - CONTENTFUL_SPACE_ID=${CONTENTFUL_SPACE_ID}
+      - CONTENTFUL_ACCESS_TOKEN=${CONTENTFUL_ACCESS_TOKEN}
+      - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
+      - CONTACT_EMAIL=${CONTACT_EMAIL}
+    ports:
+      - "${INVESTORS_PORT}:${INVESTORS_PORT}"
+    volumes:
+      - ./2_SERVICES/investors-website:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - iworkz-network
+    restart: unless-stopped
+
 volumes:
   postgres_data:
     driver: local
@@ -272,6 +454,16 @@ volumes:
   voice_models:
     driver: local
   voice_audio:
+    driver: local
+  notification_templates:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  mongo_data:
+    driver: local
+  mongo_config:
+    driver: local
+  credential_uploads:
     driver: local
 
 networks:

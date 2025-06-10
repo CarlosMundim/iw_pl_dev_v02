@@ -1,0 +1,911 @@
+openapi: 3.0.3
+info:
+  title: iWORKZ Platform API
+  description: |
+    Comprehensive API specification for the iWORKZ AI-powered employment platform.
+    This API provides endpoints for talent matching, compliance management, and 
+    blockchain-verified credential management specifically designed for the Japanese market.
+  version: 1.0.0
+  contact:
+    name: iWORKZ API Support
+    email: api-support@iworkz.jp
+    url: https://docs.iworkz.jp
+  license:
+    name: Proprietary
+    url: https://iworkz.jp/license
+
+servers:
+  - url: https://api.iworkz.jp/v1
+    description: Production server
+  - url: https://staging-api.iworkz.jp/v1
+    description: Staging server
+  - url: http://localhost:3000/v1
+    description: Development server
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+paths:
+  # Authentication Endpoints
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: User login
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                mfa_code:
+                  type: string
+                  description: Multi-factor authentication code
+              required: [email, password]
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: User registration
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+      responses:
+        '201':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  # User Management Endpoints
+  /users/profile:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      operationId: getUserProfile
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    patch:
+      tags: [Users]
+      summary: Update user profile
+      operationId: updateUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdate'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  # Job Management Endpoints
+  /jobs:
+    get:
+      tags: [Jobs]
+      summary: Search and list jobs
+      operationId: searchJobs
+      parameters:
+        - name: q
+          in: query
+          description: Search query
+          schema:
+            type: string
+        - name: location
+          in: query
+          description: Job location
+          schema:
+            type: string
+        - name: skills
+          in: query
+          description: Required skills (comma-separated)
+          schema:
+            type: string
+        - name: salary_min
+          in: query
+          description: Minimum salary
+          schema:
+            type: integer
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Jobs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jobs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Job'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  total:
+                    type: integer
+
+    post:
+      tags: [Jobs]
+      summary: Create new job posting
+      operationId: createJob
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobCreate'
+      responses:
+        '201':
+          description: Job created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /jobs/{jobId}:
+    get:
+      tags: [Jobs]
+      summary: Get job details
+      operationId: getJob
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Job details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobDetailed'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # AI Matching Endpoints
+  /matching/candidates:
+    post:
+      tags: [AI Matching]
+      summary: Find matching candidates for a job
+      operationId: findMatchingCandidates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                job_id:
+                  type: string
+                  format: uuid
+                match_criteria:
+                  $ref: '#/components/schemas/MatchCriteria'
+                limit:
+                  type: integer
+                  default: 10
+                  maximum: 50
+      responses:
+        '200':
+          description: Matching candidates found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matches:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CandidateMatch'
+                  matching_metadata:
+                    $ref: '#/components/schemas/MatchingMetadata'
+
+  /matching/jobs:
+    post:
+      tags: [AI Matching]
+      summary: Find matching jobs for a candidate
+      operationId: findMatchingJobs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                candidate_id:
+                  type: string
+                  format: uuid
+                preferences:
+                  $ref: '#/components/schemas/CandidatePreferences'
+                limit:
+                  type: integer
+                  default: 10
+                  maximum: 50
+      responses:
+        '200':
+          description: Matching jobs found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  matches:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JobMatch'
+                  matching_metadata:
+                    $ref: '#/components/schemas/MatchingMetadata'
+
+  # Compliance Endpoints
+  /compliance/validate:
+    post:
+      tags: [Compliance]
+      summary: Validate employment compliance
+      operationId: validateCompliance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComplianceValidationRequest'
+      responses:
+        '200':
+          description: Compliance validation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComplianceValidationResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /compliance/reports:
+    get:
+      tags: [Compliance]
+      summary: Get compliance reports
+      operationId: getComplianceReports
+      parameters:
+        - name: start_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: report_type
+          in: query
+          schema:
+            type: string
+            enum: [employment_law, visa_status, tax_compliance, labor_standards]
+      responses:
+        '200':
+          description: Compliance reports retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ComplianceReport'
+
+  # Blockchain Credentials Endpoints
+  /credentials:
+    get:
+      tags: [Credentials]
+      summary: Get user credentials
+      operationId: getUserCredentials
+      responses:
+        '200':
+          description: Credentials retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Credential'
+
+    post:
+      tags: [Credentials]
+      summary: Create new credential
+      operationId: createCredential
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CredentialCreate'
+      responses:
+        '201':
+          description: Credential created and stored on blockchain
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credential'
+
+  /credentials/{credentialId}/verify:
+    get:
+      tags: [Credentials]
+      summary: Verify credential authenticity
+      operationId: verifyCredential
+      parameters:
+        - name: credentialId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Credential verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialVerification'
+
+  # Analytics Endpoints
+  /analytics/dashboard:
+    get:
+      tags: [Analytics]
+      summary: Get dashboard analytics
+      operationId: getDashboardAnalytics
+      parameters:
+        - name: timeframe
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month, quarter, year]
+            default: week
+      responses:
+        '200':
+          description: Dashboard analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardAnalytics'
+
+  # Notification Endpoints
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: Get user notifications
+      operationId: getNotifications
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [unread, read, all]
+            default: all
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [job_match, application_update, system, compliance]
+      responses:
+        '200':
+          description: Notifications retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    # Authentication Schemas
+    AuthResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+        token_type:
+          type: string
+          default: Bearer
+        user:
+          $ref: '#/components/schemas/User'
+
+    # User Schemas
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        role:
+          type: string
+          enum: [candidate, employer, admin]
+        created_at:
+          type: string
+          format: date-time
+        last_login:
+          type: string
+          format: date-time
+
+    UserRegistration:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        first_name:
+          type: string
+        last_name:
+          type: string
+        role:
+          type: string
+          enum: [candidate, employer]
+        phone:
+          type: string
+        company_name:
+          type: string
+          description: Required for employers
+      required: [email, password, first_name, last_name, role]
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+        last_name:
+          type: string
+        phone:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/Skill'
+        experience:
+          type: array
+          items:
+            $ref: '#/components/schemas/Experience'
+        education:
+          type: array
+          items:
+            $ref: '#/components/schemas/Education'
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Language'
+        visa_status:
+          $ref: '#/components/schemas/VisaStatus'
+
+    # Job Schemas
+    Job:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        company:
+          $ref: '#/components/schemas/Company'
+        location:
+          $ref: '#/components/schemas/Location'
+        description:
+          type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        skills:
+          type: array
+          items:
+            $ref: '#/components/schemas/Skill'
+        salary:
+          $ref: '#/components/schemas/Salary'
+        employment_type:
+          type: string
+          enum: [full_time, part_time, contract, temporary]
+        remote_work:
+          type: boolean
+        posted_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, paused, closed, expired]
+
+    JobCreate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        skills:
+          type: array
+          items:
+            type: string
+        location:
+          $ref: '#/components/schemas/LocationInput'
+        salary:
+          $ref: '#/components/schemas/SalaryInput'
+        employment_type:
+          type: string
+          enum: [full_time, part_time, contract, temporary]
+        remote_work:
+          type: boolean
+          default: false
+        visa_sponsorship:
+          type: boolean
+          default: false
+      required: [title, description, employment_type]
+
+    # Matching Schemas
+    MatchCriteria:
+      type: object
+      properties:
+        skills_weight:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.4
+        experience_weight:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.3
+        location_weight:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.2
+        language_weight:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.1
+        minimum_score:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.7
+
+    CandidateMatch:
+      type: object
+      properties:
+        candidate:
+          $ref: '#/components/schemas/User'
+        match_score:
+          type: number
+          minimum: 0
+          maximum: 1
+        skill_match:
+          type: number
+          minimum: 0
+          maximum: 1
+        experience_match:
+          type: number
+          minimum: 0
+          maximum: 1
+        location_match:
+          type: number
+          minimum: 0
+          maximum: 1
+        language_match:
+          type: number
+          minimum: 0
+          maximum: 1
+        explanation:
+          type: string
+        matched_skills:
+          type: array
+          items:
+            type: string
+
+    # Compliance Schemas
+    ComplianceValidationRequest:
+      type: object
+      properties:
+        candidate_id:
+          type: string
+          format: uuid
+        job_id:
+          type: string
+          format: uuid
+        validation_type:
+          type: string
+          enum: [visa_eligibility, tax_compliance, labor_law, work_permit]
+      required: [candidate_id, job_id, validation_type]
+
+    ComplianceValidationResult:
+      type: object
+      properties:
+        is_compliant:
+          type: boolean
+        validation_score:
+          type: number
+          minimum: 0
+          maximum: 1
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComplianceIssue'
+        recommendations:
+          type: array
+          items:
+            type: string
+        legal_requirements:
+          type: array
+          items:
+            $ref: '#/components/schemas/LegalRequirement'
+
+    # Credential Schemas
+    Credential:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [education, certification, experience, skill_assessment]
+        title:
+          type: string
+        issuer:
+          type: string
+        issue_date:
+          type: string
+          format: date
+        expiry_date:
+          type: string
+          format: date
+        blockchain_hash:
+          type: string
+        ipfs_hash:
+          type: string
+        verification_status:
+          type: string
+          enum: [verified, pending, failed]
+        metadata:
+          type: object
+
+    # Supporting Schemas
+    Location:
+      type: object
+      properties:
+        address:
+          type: string
+        city:
+          type: string
+        prefecture:
+          type: string
+        postal_code:
+          type: string
+        country:
+          type: string
+          default: JP
+        coordinates:
+          type: object
+          properties:
+            lat:
+              type: number
+            lng:
+              type: number
+
+    Skill:
+      type: object
+      properties:
+        name:
+          type: string
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced, expert]
+        years_experience:
+          type: integer
+        certified:
+          type: boolean
+
+    Company:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        industry:
+          type: string
+        size:
+          type: string
+          enum: [startup, small, medium, large, enterprise]
+        website:
+          type: string
+          format: uri
+
+    Salary:
+      type: object
+      properties:
+        min:
+          type: integer
+        max:
+          type: integer
+        currency:
+          type: string
+          default: JPY
+        period:
+          type: string
+          enum: [hourly, daily, monthly, yearly]
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total_pages:
+          type: integer
+        has_next:
+          type: boolean
+        has_previous:
+          type: boolean
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Conflict:
+      description: Resource conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Users
+    description: User profile management
+  - name: Jobs
+    description: Job posting and management
+  - name: AI Matching
+    description: AI-powered talent matching
+  - name: Compliance
+    description: Employment law compliance
+  - name: Credentials
+    description: Blockchain credential verification
+  - name: Analytics
+    description: Platform analytics and insights
+  - name: Notifications
+    description: User notifications

@@ -1,0 +1,181 @@
+groups:
+  - name: iworkz-platform-alerts
+    rules:
+      # Service Health Alerts
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.instance }} is down"
+          description: "Service {{ $labels.instance }} has been down for more than 1 minute."
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on {{ $labels.instance }}"
+          description: "Error rate is above 10% for {{ $labels.instance }}"
+
+      # Performance Alerts
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time on {{ $labels.instance }}"
+          description: "95th percentile response time is above 2 seconds for {{ $labels.instance }}"
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is above 80% for {{ $labels.instance }}"
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is above 85% for {{ $labels.instance }}"
+
+      - alert: LowDiskSpace
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space on {{ $labels.instance }}"
+          description: "Disk usage is above 90% for {{ $labels.instance }}"
+
+      # Database Alerts
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PostgreSQL is down"
+          description: "PostgreSQL database is not responding"
+
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis cache is not responding"
+
+      - alert: ElasticsearchDown
+        expr: elasticsearch_cluster_health_status != 1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Elasticsearch cluster unhealthy"
+          description: "Elasticsearch cluster status is not green"
+
+      # Application-specific Alerts
+      - alert: HighJobApplicationVolume
+        expr: rate(job_applications_total[5m]) > 100
+        for: 2m
+        labels:
+          severity: info
+        annotations:
+          summary: "High job application volume"
+          description: "Job application rate is above 100 per 5 minutes"
+
+      - alert: LowMatchingSuccessRate
+        expr: rate(matching_success_total[10m]) / rate(matching_attempts_total[10m]) < 0.7
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low matching success rate"
+          description: "Job matching success rate is below 70%"
+
+      - alert: HighNotificationFailureRate
+        expr: rate(notification_failures_total[5m]) / rate(notification_attempts_total[5m]) > 0.1
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High notification failure rate"
+          description: "Notification failure rate is above 10%"
+
+      # Container Health Alerts
+      - alert: ContainerRestarting
+        expr: rate(container_last_seen[5m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} is restarting"
+          description: "Container {{ $labels.name }} has restarted recently"
+
+      - alert: ContainerHighMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} high memory usage"
+          description: "Container {{ $labels.name }} memory usage is above 90%"
+
+      - alert: ContainerHighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} high CPU usage"
+          description: "Container {{ $labels.name }} CPU usage is above 80%"
+
+  - name: business-metrics-alerts
+    rules:
+      # Business Logic Alerts
+      - alert: LowUserRegistrationRate
+        expr: rate(user_registrations_total[1h]) < 5
+        for: 10m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low user registration rate"
+          description: "User registration rate is below 5 per hour"
+
+      - alert: HighUserChurnRate
+        expr: rate(user_deletions_total[24h]) / rate(user_registrations_total[24h]) > 0.2
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "High user churn rate"
+          description: "User churn rate is above 20%"
+
+      - alert: LowJobPostingRate
+        expr: rate(job_postings_total[1h]) < 2
+        for: 15m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low job posting rate"
+          description: "Job posting rate is below 2 per hour"
+
+      - alert: AbnormalAPIUsagePattern
+        expr: rate(api_requests_total[5m]) > 1000 or rate(api_requests_total[5m]) < 10
+        for: 3m
+        labels:
+          severity: info
+        annotations:
+          summary: "Abnormal API usage pattern"
+          description: "API request rate is outside normal range (10-1000 req/5min)"

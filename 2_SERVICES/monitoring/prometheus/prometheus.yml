@@ -1,0 +1,158 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'iworkz-platform'
+    environment: 'development'
+
+rule_files:
+  - "rules/*.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter (System metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # cAdvisor (Container metrics)
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+  # iWORKZ Backend API
+  - job_name: 'iworkz-backend-api'
+    static_configs:
+      - targets: ['backend-api:3001']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # iWORKZ AI Agent
+  - job_name: 'iworkz-ai-agent'
+    static_configs:
+      - targets: ['ai-agent:8001']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # iWORKZ Matching Engine
+  - job_name: 'iworkz-matching-engine'
+    static_configs:
+      - targets: ['matching-engine:3003']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # iWORKZ Compliance Engine
+  - job_name: 'iworkz-compliance-engine'
+    static_configs:
+      - targets: ['compliance-engine:8003']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # iWORKZ Analytics Service
+  - job_name: 'iworkz-analytics-service'
+    static_configs:
+      - targets: ['analytics-service:8004']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # iWORKZ Voice Assistant
+  - job_name: 'iworkz-voice-assistant'
+    static_configs:
+      - targets: ['voice-assistant:8005']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # iWORKZ Notification Service
+  - job_name: 'iworkz-notification-service'
+    static_configs:
+      - targets: ['notification-service:8006']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # iWORKZ Search Service
+  - job_name: 'iworkz-search-service'
+    static_configs:
+      - targets: ['search-service:8007']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # iWORKZ Credential Engine
+  - job_name: 'iworkz-credential-engine'
+    static_configs:
+      - targets: ['credential-engine:8008']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # iWORKZ Integration Hub
+  - job_name: 'iworkz-integration-hub'
+    static_configs:
+      - targets: ['integration-hub:3004']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # Database Services
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres:5432']
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis:6379']
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+
+  # Elasticsearch
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch:9200']
+    metrics_path: '/_prometheus/metrics'
+    scrape_interval: 60s
+
+  # Blackbox Exporter for endpoint monitoring
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - http://web-frontend:3000
+        - http://admin-dashboard:3002
+        - http://investors-website:3005
+        - http://backend-api:3001/health
+        - http://ai-agent:8001/health
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+# Remote write configuration for long-term storage (optional)
+# remote_write:
+#   - url: "https://prometheus-remote-write-endpoint.com/api/v1/write"
+#     basic_auth:
+#       username: "username"
+#       password: "password"

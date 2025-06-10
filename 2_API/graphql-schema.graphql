@@ -1,0 +1,782 @@
+# iWORKZ Platform GraphQL Schema
+# Unified GraphQL API for the AI-powered employment platform
+
+scalar DateTime
+scalar JSON
+scalar Upload
+scalar UUID
+
+# Root Types
+type Query {
+  # User queries
+  me: User
+  user(id: UUID!): User
+  users(filter: UserFilter, pagination: Pagination): UserConnection!
+  
+  # Job queries
+  job(id: UUID!): Job
+  jobs(filter: JobFilter, pagination: Pagination): JobConnection!
+  searchJobs(query: String!, filters: JobSearchFilter): [Job!]!
+  
+  # AI Matching queries
+  findMatchingCandidates(jobId: UUID!, criteria: MatchCriteria): [CandidateMatch!]!
+  findMatchingJobs(candidateId: UUID!, preferences: JobPreferences): [JobMatch!]!
+  getMatchingScore(candidateId: UUID!, jobId: UUID!): MatchingResult!
+  
+  # Compliance queries
+  validateCompliance(request: ComplianceValidationInput!): ComplianceValidationResult!
+  getComplianceReports(filter: ComplianceReportFilter!): [ComplianceReport!]!
+  
+  # Credential queries
+  credentials(userId: UUID): [Credential!]!
+  verifyCredential(id: String!): CredentialVerification!
+  
+  # Analytics queries
+  getDashboardAnalytics(timeframe: TimeFrame!): DashboardAnalytics!
+  getJobMarketInsights(filters: MarketInsightFilter): JobMarketInsights!
+  
+  # Application queries
+  applications(filter: ApplicationFilter): [Application!]!
+  application(id: UUID!): Application
+  
+  # Notification queries
+  notifications(filter: NotificationFilter): [Notification!]!
+  unreadNotificationCount: Int!
+}
+
+type Mutation {
+  # Authentication mutations
+  login(input: LoginInput!): AuthPayload!
+  register(input: RegisterInput!): AuthPayload!
+  refreshToken(token: String!): AuthPayload!
+  logout: Boolean!
+  
+  # User mutations
+  updateProfile(input: UpdateProfileInput!): User!
+  uploadResume(file: Upload!): Document!
+  updatePreferences(input: UserPreferencesInput!): User!
+  
+  # Job mutations
+  createJob(input: CreateJobInput!): Job!
+  updateJob(id: UUID!, input: UpdateJobInput!): Job!
+  deleteJob(id: UUID!): Boolean!
+  publishJob(id: UUID!): Job!
+  pauseJob(id: UUID!): Job!
+  
+  # Application mutations
+  applyToJob(jobId: UUID!, input: ApplicationInput!): Application!
+  updateApplicationStatus(id: UUID!, status: ApplicationStatus!): Application!
+  withdrawApplication(id: UUID!): Boolean!
+  
+  # AI Matching mutations
+  saveMatchingPreferences(input: MatchingPreferencesInput!): MatchingPreferences!
+  provideFeedback(input: MatchingFeedbackInput!): Boolean!
+  
+  # Compliance mutations
+  submitComplianceDocument(input: ComplianceDocumentInput!): ComplianceDocument!
+  updateVisaStatus(input: VisaStatusInput!): User!
+  
+  # Credential mutations
+  createCredential(input: CreateCredentialInput!): Credential!
+  verifyCredentialSubmission(id: String!, verification: CredentialVerificationInput!): Credential!
+  
+  # Notification mutations
+  markNotificationAsRead(id: UUID!): Notification!
+  markAllNotificationsAsRead: Boolean!
+  updateNotificationSettings(input: NotificationSettingsInput!): NotificationSettings!
+}
+
+type Subscription {
+  # Real-time notifications
+  notificationAdded(userId: UUID!): Notification!
+  
+  # Job matching updates
+  newJobMatches(candidateId: UUID!): JobMatch!
+  newCandidateMatches(jobId: UUID!): CandidateMatch!
+  
+  # Application status updates
+  applicationStatusChanged(userId: UUID!): Application!
+  
+  # Real-time analytics
+  dashboardUpdated(userId: UUID!): DashboardAnalytics!
+}
+
+# User Types
+type User {
+  id: UUID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  fullName: String!
+  role: UserRole!
+  avatar: String
+  phone: String
+  location: Location
+  profile: UserProfile
+  preferences: UserPreferences
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lastLoginAt: DateTime
+  isActive: Boolean!
+  isVerified: Boolean!
+  
+  # Relationships
+  applications: [Application!]!
+  credentials: [Credential!]!
+  notifications: [Notification!]!
+  company: Company
+  
+  # Computed fields
+  matchingScore(jobId: UUID!): Float
+  recommendedJobs(limit: Int = 10): [Job!]!
+  skillsAssessment: SkillsAssessment
+}
+
+type UserProfile {
+  bio: String
+  experience: [Experience!]!
+  education: [Education!]!
+  skills: [Skill!]!
+  languages: [Language!]!
+  certifications: [Certification!]!
+  workAuthorization: WorkAuthorization
+  salaryExpectation: SalaryRange
+  availabilityDate: DateTime
+  workPreferences: WorkPreferences
+  culturalPreferences: CulturalPreferences
+}
+
+type Experience {
+  id: UUID!
+  title: String!
+  company: String!
+  description: String
+  startDate: DateTime!
+  endDate: DateTime
+  isCurrent: Boolean!
+  skills: [String!]!
+  location: Location
+}
+
+type Education {
+  id: UUID!
+  institution: String!
+  degree: String!
+  fieldOfStudy: String!
+  startDate: DateTime!
+  endDate: DateTime
+  gpa: Float
+  description: String
+}
+
+type Skill {
+  id: UUID!
+  name: String!
+  level: SkillLevel!
+  yearsExperience: Int
+  certified: Boolean!
+  endorsements: Int!
+}
+
+type Language {
+  code: String!
+  name: String!
+  proficiency: LanguageProficiency!
+  nativeLanguage: Boolean!
+}
+
+# Job Types
+type Job {
+  id: UUID!
+  title: String!
+  description: String!
+  requirements: [String!]!
+  responsibilities: [String!]!
+  skills: [JobSkill!]!
+  location: Location!
+  company: Company!
+  salary: SalaryRange
+  employmentType: EmploymentType!
+  experienceLevel: ExperienceLevel!
+  remoteWork: RemoteWorkType!
+  visaSponsorship: Boolean!
+  benefits: [Benefit!]!
+  status: JobStatus!
+  postedAt: DateTime!
+  expiresAt: DateTime
+  viewCount: Int!
+  applicationCount: Int!
+  
+  # Relationships
+  applications: [Application!]!
+  matchingCandidates(limit: Int = 10): [CandidateMatch!]!
+  
+  # Computed fields
+  isExpired: Boolean!
+  daysUntilExpiry: Int
+  matchingScore(candidateId: UUID!): Float
+}
+
+type JobSkill {
+  skill: String!
+  level: SkillLevel!
+  required: Boolean!
+  weight: Float!
+}
+
+type Company {
+  id: UUID!
+  name: String!
+  description: String
+  industry: String!
+  size: CompanySize!
+  founded: Int
+  website: String
+  logo: String
+  location: Location!
+  culture: CompanyCulture
+  benefits: [Benefit!]!
+  
+  # Relationships
+  jobs: [Job!]!
+  employees: [User!]!
+  
+  # Computed fields
+  rating: Float
+  reviewCount: Int!
+  activeJobCount: Int!
+}
+
+# Matching Types
+type CandidateMatch {
+  candidate: User!
+  job: Job!
+  overallScore: Float!
+  skillsScore: Float!
+  experienceScore: Float!
+  locationScore: Float!
+  languageScore: Float!
+  culturalFitScore: Float!
+  explanation: String!
+  matchedSkills: [String!]!
+  matchedExperience: [String!]!
+  recommendations: [String!]!
+  confidence: Float!
+  timestamp: DateTime!
+}
+
+type JobMatch {
+  job: Job!
+  candidate: User!
+  overallScore: Float!
+  skillsScore: Float!
+  experienceScore: Float!
+  locationScore: Float!
+  salaryScore: Float!
+  culturalFitScore: Float!
+  explanation: String!
+  matchedRequirements: [String!]!
+  missingSkills: [String!]!
+  recommendations: [String!]!
+  confidence: Float!
+  timestamp: DateTime!
+}
+
+type MatchingResult {
+  candidateId: UUID!
+  jobId: UUID!
+  overallScore: Float!
+  breakdown: MatchingBreakdown!
+  analysis: MatchingAnalysis!
+  recommendations: [String!]!
+}
+
+type MatchingBreakdown {
+  skills: Float!
+  experience: Float!
+  location: Float!
+  language: Float!
+  salary: Float!
+  culture: Float!
+}
+
+type MatchingAnalysis {
+  strengths: [String!]!
+  weaknesses: [String!]!
+  opportunities: [String!]!
+  risks: [String!]!
+}
+
+# Application Types
+type Application {
+  id: UUID!
+  candidate: User!
+  job: Job!
+  status: ApplicationStatus!
+  appliedAt: DateTime!
+  updatedAt: DateTime!
+  coverLetter: String
+  resume: Document
+  customAnswers: [CustomAnswer!]!
+  feedback: ApplicationFeedback
+  
+  # AI Analysis
+  matchingScore: Float!
+  matchingAnalysis: MatchingAnalysis
+  
+  # Timeline
+  timeline: [ApplicationEvent!]!
+  
+  # Computed fields
+  daysInStatus: Int!
+  isActive: Boolean!
+}
+
+type ApplicationEvent {
+  id: UUID!
+  type: ApplicationEventType!
+  description: String!
+  timestamp: DateTime!
+  actor: User
+  metadata: JSON
+}
+
+type ApplicationFeedback {
+  rating: Int
+  comments: String
+  strengths: [String!]!
+  improvements: [String!]!
+  providedAt: DateTime!
+  providedBy: User!
+}
+
+# Compliance Types
+type ComplianceValidationResult {
+  isCompliant: Boolean!
+  validationScore: Float!
+  issues: [ComplianceIssue!]!
+  recommendations: [String!]!
+  legalRequirements: [LegalRequirement!]!
+  requiredDocuments: [String!]!
+  validatedAt: DateTime!
+}
+
+type ComplianceIssue {
+  category: ComplianceCategory!
+  severity: IssueSeverity!
+  description: String!
+  recommendation: String!
+  legalReference: String
+  deadline: DateTime
+}
+
+type ComplianceReport {
+  id: UUID!
+  type: ComplianceReportType!
+  period: DateRange!
+  data: JSON!
+  generatedAt: DateTime!
+  status: ReportStatus!
+}
+
+# Credential Types
+type Credential {
+  id: String!
+  type: CredentialType!
+  title: String!
+  issuer: String!
+  issueDate: DateTime!
+  expiryDate: DateTime
+  description: String
+  blockchainHash: String!
+  ipfsHash: String!
+  verificationStatus: VerificationStatus!
+  metadata: JSON
+  
+  # Verification details
+  verifiedAt: DateTime
+  verifiedBy: String
+  verificationScore: Float
+}
+
+type CredentialVerification {
+  isValid: Boolean!
+  verificationScore: Float!
+  blockchainVerified: Boolean!
+  issuerVerified: Boolean!
+  dataIntegrityVerified: Boolean!
+  expiryStatus: ExpiryStatus!
+  verifiedAt: DateTime!
+  issues: [VerificationIssue!]!
+}
+
+# Analytics Types
+type DashboardAnalytics {
+  totalJobs: Int!
+  activeJobs: Int!
+  totalCandidates: Int!
+  activeCandidates: Int!
+  totalApplications: Int!
+  successfulMatches: Int!
+  averageMatchingScore: Float!
+  topSkills: [SkillDemand!]!
+  topLocations: [LocationDemand!]!
+  industryBreakdown: [IndustryStats!]!
+  timeSeriesData: [TimeSeriesPoint!]!
+  generatedAt: DateTime!
+}
+
+type JobMarketInsights {
+  totalJobs: Int!
+  averageSalary: Float!
+  salaryTrends: [SalaryTrend!]!
+  skillDemand: [SkillDemand!]!
+  locationDemand: [LocationDemand!]!
+  industryGrowth: [IndustryGrowth!]!
+  remoteWorkTrends: RemoteWorkTrends!
+}
+
+# Notification Types
+type Notification {
+  id: UUID!
+  user: User!
+  type: NotificationType!
+  title: String!
+  message: String!
+  data: JSON
+  isRead: Boolean!
+  priority: NotificationPriority!
+  channel: NotificationChannel!
+  createdAt: DateTime!
+  readAt: DateTime
+}
+
+# Supporting Types
+type Location {
+  address: String
+  city: String!
+  prefecture: String!
+  postalCode: String
+  country: String!
+  coordinates: Coordinates
+  timezone: String
+}
+
+type Coordinates {
+  latitude: Float!
+  longitude: Float!
+}
+
+type SalaryRange {
+  min: Int!
+  max: Int!
+  currency: String!
+  period: SalaryPeriod!
+}
+
+type Document {
+  id: UUID!
+  name: String!
+  type: String!
+  size: Int!
+  url: String!
+  uploadedAt: DateTime!
+}
+
+# Input Types
+input LoginInput {
+  email: String!
+  password: String!
+  mfaCode: String
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  role: UserRole!
+  phone: String
+  companyName: String
+}
+
+input CreateJobInput {
+  title: String!
+  description: String!
+  requirements: [String!]!
+  responsibilities: [String!]!
+  skills: [JobSkillInput!]!
+  location: LocationInput!
+  salary: SalaryRangeInput
+  employmentType: EmploymentType!
+  experienceLevel: ExperienceLevel!
+  remoteWork: RemoteWorkType!
+  visaSponsorship: Boolean = false
+  benefits: [BenefitInput!]!
+  expiresAt: DateTime
+}
+
+input JobSkillInput {
+  skill: String!
+  level: SkillLevel!
+  required: Boolean!
+  weight: Float = 1.0
+}
+
+input LocationInput {
+  address: String
+  city: String!
+  prefecture: String!
+  postalCode: String
+  country: String = "JP"
+}
+
+input SalaryRangeInput {
+  min: Int!
+  max: Int!
+  currency: String = "JPY"
+  period: SalaryPeriod!
+}
+
+input MatchCriteria {
+  skillsWeight: Float = 0.4
+  experienceWeight: Float = 0.3
+  locationWeight: Float = 0.2
+  languageWeight: Float = 0.1
+  minimumScore: Float = 0.7
+}
+
+input ComplianceValidationInput {
+  candidateId: UUID!
+  jobId: UUID!
+  validationType: ComplianceValidationType!
+}
+
+# Filter Types
+input UserFilter {
+  role: UserRole
+  isActive: Boolean
+  location: LocationFilter
+  skills: [String!]
+  createdAfter: DateTime
+}
+
+input JobFilter {
+  status: JobStatus
+  employmentType: EmploymentType
+  remoteWork: RemoteWorkType
+  location: LocationFilter
+  skills: [String!]
+  salaryRange: SalaryRangeFilter
+  postedAfter: DateTime
+}
+
+input LocationFilter {
+  city: String
+  prefecture: String
+  country: String
+  radius: Float
+  coordinates: CoordinatesInput
+}
+
+input CoordinatesInput {
+  latitude: Float!
+  longitude: Float!
+}
+
+input SalaryRangeFilter {
+  min: Int
+  max: Int
+  currency: String
+}
+
+input Pagination {
+  page: Int = 1
+  limit: Int = 20
+}
+
+# Connection Types
+type UserConnection {
+  nodes: [User!]!
+  edges: [UserEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type UserEdge {
+  node: User!
+  cursor: String!
+}
+
+type JobConnection {
+  nodes: [Job!]!
+  edges: [JobEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type JobEdge {
+  node: Job!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+# Enums
+enum UserRole {
+  CANDIDATE
+  EMPLOYER
+  ADMIN
+  RECRUITER
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  TEMPORARY
+  INTERNSHIP
+}
+
+enum ExperienceLevel {
+  ENTRY_LEVEL
+  JUNIOR
+  MID_LEVEL
+  SENIOR
+  EXECUTIVE
+}
+
+enum RemoteWorkType {
+  ON_SITE
+  HYBRID
+  FULLY_REMOTE
+}
+
+enum JobStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  CLOSED
+  EXPIRED
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  SHORTLISTED
+  INTERVIEWED
+  OFFERED
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum SkillLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum LanguageProficiency {
+  BASIC
+  CONVERSATIONAL
+  BUSINESS
+  FLUENT
+  NATIVE
+}
+
+enum CompanySize {
+  STARTUP
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum CredentialType {
+  EDUCATION
+  CERTIFICATION
+  EXPERIENCE
+  SKILL_ASSESSMENT
+  LICENSE
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  FAILED
+  EXPIRED
+}
+
+enum NotificationType {
+  JOB_MATCH
+  APPLICATION_UPDATE
+  INTERVIEW_SCHEDULED
+  OFFER_RECEIVED
+  SYSTEM_UPDATE
+  COMPLIANCE_ALERT
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum TimeFrame {
+  DAY
+  WEEK
+  MONTH
+  QUARTER
+  YEAR
+}
+
+enum SalaryPeriod {
+  HOURLY
+  DAILY
+  MONTHLY
+  YEARLY
+}
+
+enum ComplianceCategory {
+  VISA_STATUS
+  TAX_COMPLIANCE
+  LABOR_LAW
+  WORK_PERMIT
+  HEALTH_INSURANCE
+  PENSION
+}
+
+enum IssueSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ComplianceValidationType {
+  VISA_ELIGIBILITY
+  TAX_COMPLIANCE
+  LABOR_LAW
+  WORK_PERMIT
+  FULL_VALIDATION
+}
+
+# Directives
+directive @auth(requires: UserRole = CANDIDATE) on FIELD_DEFINITION
+directive @rateLimit(max: Int!, window: Int!) on FIELD_DEFINITION
+directive @complexity(value: Int!) on FIELD_DEFINITION

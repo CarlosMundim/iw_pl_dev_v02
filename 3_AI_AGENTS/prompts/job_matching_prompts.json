@@ -1,0 +1,97 @@
+{
+  "job_matching_prompts": {
+    "system_prompt": {
+      "role": "system",
+      "content": "You are an advanced AI job matching specialist for the iWORKZ platform, designed specifically for the Japanese employment market. Your expertise includes:\n\n1. Deep understanding of Japanese employment culture and practices\n2. Technical skill assessment across various industries\n3. Language proficiency evaluation (Japanese, English, and other languages)\n4. Cultural fit assessment for Japanese workplace environments\n5. Visa status and work authorization compliance\n6. Salary and compensation analysis in the Japanese market\n\nWhen analyzing job matches, consider these key factors:\n- Technical skills alignment and proficiency levels\n- Experience relevance and years in similar roles\n- Language requirements (business Japanese, technical English)\n- Cultural adaptation and workplace integration potential\n- Location preferences and commute feasibility\n- Salary expectations vs market rates\n- Career progression opportunities\n- Company culture fit\n\nAlways provide detailed explanations for your matching scores and recommendations."
+    },
+    "candidate_analysis": {
+      "role": "user",
+      "content": "Analyze this candidate profile for job matching:\n\nCandidate Information:\n```json\n{candidate_profile}\n```\n\nJob Requirements:\n```json\n{job_requirements}\n```\n\nPlease provide:\n1. Overall match score (0-100)\n2. Detailed breakdown by category:\n   - Technical skills match\n   - Experience relevance\n   - Language proficiency\n   - Cultural fit\n   - Location compatibility\n   - Salary alignment\n3. Strengths and gaps analysis\n4. Recommendations for improvement\n5. Cultural considerations for Japanese workplace\n\nFormat your response as a structured JSON object."
+    },
+    "skills_assessment": {
+      "role": "user",
+      "content": "Assess the technical skills alignment between candidate and job:\n\nCandidate Skills:\n```json\n{candidate_skills}\n```\n\nRequired Skills:\n```json\n{required_skills}\n```\n\nProvide:\n1. Skill-by-skill comparison\n2. Missing critical skills\n3. Transferable skills identification\n4. Skill development recommendations\n5. Overall technical compatibility score (0-100)\n\nConsider both hard technical skills and soft skills relevant to the Japanese workplace."
+    },
+    "cultural_fit_analysis": {
+      "role": "user",
+      "content": "Evaluate cultural fit for Japanese workplace:\n\nCandidate Background:\n```json\n{candidate_background}\n```\n\nCompany Culture:\n```json\n{company_culture}\n```\n\nAnalyze:\n1. Adaptation to Japanese business practices (nemawashi, ringi system, etc.)\n2. Communication style compatibility\n3. Teamwork and hierarchy respect\n4. Work-life balance expectations\n5. Long-term commitment potential\n6. Language barrier considerations\n7. Cultural sensitivity indicators\n\nProvide specific recommendations for successful integration."
+    },
+    "salary_negotiation": {
+      "role": "user",
+      "content": "Analyze salary expectations and market rates:\n\nCandidate Expectations:\n```json\n{salary_expectations}\n```\n\nMarket Data:\n```json\n{market_rates}\n```\n\nJob Details:\n```json\n{job_details}\n```\n\nProvide:\n1. Market rate analysis for similar positions\n2. Negotiation recommendations\n3. Total compensation package evaluation\n4. Career progression salary potential\n5. Industry-specific considerations\n6. Regional salary variations in Japan\n\nInclude advice on Japanese salary negotiation customs and practices."
+    },
+    "interview_preparation": {
+      "role": "user",
+      "content": "Generate interview preparation guidance:\n\nJob Position:\n```json\n{job_position}\n```\n\nCandidate Profile:\n```json\n{candidate_profile}\n```\n\nCreate:\n1. Technical questions likely to be asked\n2. Cultural and behavioral questions for Japanese interviews\n3. Questions the candidate should ask\n4. Areas to highlight during the interview\n5. Potential concerns to address proactively\n6. Japanese interview etiquette tips\n7. Follow-up recommendations\n\nTailor advice specifically for the Japanese job market and interview culture."
+    },
+    "rejection_feedback": {
+      "role": "user",
+      "content": "Generate constructive feedback for rejected candidates:\n\nApplication Details:\n```json\n{application_details}\n```\n\nRejection Reasons:\n```json\n{rejection_reasons}\n```\n\nProvide:\n1. Honest but encouraging feedback\n2. Specific areas for improvement\n3. Alternative career paths or positions\n4. Skill development recommendations\n5. Market insights and trends\n6. Networking suggestions\n7. Timeline for reapplication\n\nEnsure feedback is culturally sensitive and maintains the candidate's motivation."
+    },
+    "job_recommendation": {
+      "role": "user",
+      "content": "Recommend jobs for this candidate:\n\nCandidate Profile:\n```json\n{candidate_profile}\n```\n\nAvailable Jobs:\n```json\n{available_jobs}\n```\n\nGenerate:\n1. Top 5 job recommendations with match scores\n2. Explanation for each recommendation\n3. Growth potential analysis\n4. Application strategy for each role\n5. Timeline recommendations\n6. Skill gap analysis per role\n7. Cultural fit assessment\n\nPrioritize long-term career development and cultural integration success."
+    },
+    "compliance_check": {
+      "role": "user",
+      "content": "Verify employment compliance for Japanese market:\n\nCandidate Information:\n```json\n{candidate_info}\n```\n\nJob Requirements:\n```json\n{job_requirements}\n```\n\nCheck:\n1. Visa status and work authorization\n2. Educational credential recognition\n3. Professional license requirements\n4. Language certification needs\n5. Health insurance and pension eligibility\n6. Tax implications\n7. Employment law compliance\n\nProvide clear guidance on any compliance issues and resolution steps."
+    }
+  },
+  "response_templates": {
+    "match_analysis": {
+      "overall_score": 0,
+      "breakdown": {
+        "technical_skills": 0,
+        "experience": 0,
+        "language": 0,
+        "cultural_fit": 0,
+        "location": 0,
+        "salary": 0
+      },
+      "strengths": [],
+      "gaps": [],
+      "recommendations": [],
+      "cultural_notes": "",
+      "confidence_level": 0
+    },
+    "job_recommendation": {
+      "job_id": "",
+      "job_title": "",
+      "company": "",
+      "match_score": 0,
+      "reasons": [],
+      "growth_potential": "",
+      "cultural_fit": "",
+      "application_strategy": ""
+    }
+  },
+  "cultural_keywords": [
+    "teamwork",
+    "harmony",
+    "respect",
+    "dedication",
+    "continuous_improvement",
+    "attention_to_detail",
+    "punctuality",
+    "hierarchy_respect",
+    "group_consensus",
+    "long_term_commitment",
+    "quality_focus",
+    "customer_service",
+    "adaptability",
+    "humble_attitude",
+    "proactive_communication"
+  ],
+  "japanese_business_terms": [
+    "omotenashi",
+    "kaizen",
+    "nemawashi",
+    "ringi",
+    "consensus",
+    "senpai_kohai",
+    "meishi_koukan",
+    "nommunication",
+    "honne_tatemae",
+    "ganbatte"
+  ]
+}

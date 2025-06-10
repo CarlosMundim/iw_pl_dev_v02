@@ -1,0 +1,364 @@
+{
+  "training_dataset": {
+    "metadata": {
+      "version": "1.0.0",
+      "created_date": "2024-01-20",
+      "description": "Sample training data for iWORKZ AI matching engine",
+      "total_samples": 1000,
+      "languages": ["ja", "en"],
+      "data_types": ["job_candidate_pairs", "skill_mappings", "cultural_assessments"]
+    },
+    "job_candidate_pairs": [
+      {
+        "pair_id": "pair_001",
+        "candidate": {
+          "id": "candidate_001",
+          "skills": [
+            {"name": "React", "level": "advanced", "years_experience": 5},
+            {"name": "TypeScript", "level": "expert", "years_experience": 4},
+            {"name": "Node.js", "level": "intermediate", "years_experience": 3},
+            {"name": "Python", "level": "beginner", "years_experience": 1}
+          ],
+          "experience": [
+            {
+              "title": "Senior Frontend Developer",
+              "company": "Tech Startup Tokyo",
+              "duration_years": 3,
+              "technologies": ["React", "TypeScript", "Redux"],
+              "team_size": 8,
+              "role_type": "technical_lead"
+            }
+          ],
+          "education": {
+            "degree": "Computer Science",
+            "level": "bachelor",
+            "university": "Tokyo University",
+            "graduation_year": 2018
+          },
+          "languages": [
+            {"code": "ja", "level": "native"},
+            {"code": "en", "level": "business"}
+          ],
+          "location": {
+            "city": "Tokyo",
+            "prefecture": "Tokyo",
+            "willing_to_relocate": false
+          },
+          "cultural_background": {
+            "japanese_experience": true,
+            "cultural_adaptation_score": 0.95,
+            "business_etiquette_familiarity": "high"
+          },
+          "visa_status": "permanent_resident",
+          "salary_expectation": {
+            "min": 8000000,
+            "max": 12000000,
+            "currency": "JPY"
+          }
+        },
+        "job": {
+          "id": "job_001",
+          "title": "Senior React Developer",
+          "company": {
+            "name": "Global Tech Corp",
+            "industry": "Technology",
+            "size": "large",
+            "culture_type": "international"
+          },
+          "requirements": {
+            "skills": [
+              {"name": "React", "level": "advanced", "required": true, "weight": 0.8},
+              {"name": "TypeScript", "level": "intermediate", "required": true, "weight": 0.7},
+              {"name": "Node.js", "level": "intermediate", "required": false, "weight": 0.5}
+            ],
+            "experience_years": 4,
+            "education_level": "bachelor",
+            "languages": [
+              {"code": "ja", "level": "business", "required": true},
+              {"code": "en", "level": "conversational", "required": true}
+            ]
+          },
+          "location": {
+            "city": "Tokyo",
+            "prefecture": "Tokyo",
+            "remote_work": "hybrid"
+          },
+          "salary_range": {
+            "min": 7000000,
+            "max": 11000000,
+            "currency": "JPY"
+          },
+          "cultural_requirements": {
+            "teamwork_emphasis": "high",
+            "hierarchy_level": "medium",
+            "communication_style": "direct",
+            "overtime_expectation": "moderate"
+          }
+        },
+        "match_score": 0.87,
+        "breakdown": {
+          "skills_match": 0.92,
+          "experience_match": 0.85,
+          "language_match": 0.90,
+          "cultural_fit": 0.88,
+          "location_match": 1.0,
+          "salary_alignment": 0.95
+        },
+        "human_feedback": {
+          "recruiter_score": 0.85,
+          "hiring_manager_score": 0.88,
+          "interview_outcome": "hired",
+          "performance_rating": 4.2,
+          "retention_months": 18
+        }
+      },
+      {
+        "pair_id": "pair_002",
+        "candidate": {
+          "id": "candidate_002",
+          "skills": [
+            {"name": "Java", "level": "expert", "years_experience": 8},
+            {"name": "Spring", "level": "advanced", "years_experience": 6},
+            {"name": "AWS", "level": "intermediate", "years_experience": 4},
+            {"name": "Docker", "level": "intermediate", "years_experience": 3}
+          ],
+          "experience": [
+            {
+              "title": "Backend Engineer",
+              "company": "Japanese Bank",
+              "duration_years": 5,
+              "technologies": ["Java", "Spring", "Oracle"],
+              "team_size": 15,
+              "role_type": "individual_contributor"
+            }
+          ],
+          "education": {
+            "degree": "Information Systems",
+            "level": "master",
+            "university": "Waseda University",
+            "graduation_year": 2015
+          },
+          "languages": [
+            {"code": "ja", "level": "native"},
+            {"code": "en", "level": "intermediate"}
+          ],
+          "location": {
+            "city": "Osaka",
+            "prefecture": "Osaka",
+            "willing_to_relocate": true
+          },
+          "cultural_background": {
+            "japanese_experience": true,
+            "cultural_adaptation_score": 1.0,
+            "business_etiquette_familiarity": "expert"
+          },
+          "visa_status": "japanese_citizen",
+          "salary_expectation": {
+            "min": 9000000,
+            "max": 13000000,
+            "currency": "JPY"
+          }
+        },
+        "job": {
+          "id": "job_002",
+          "title": "Senior Backend Engineer",
+          "company": {
+            "name": "Traditional Manufacturing Corp",
+            "industry": "Manufacturing",
+            "size": "enterprise",
+            "culture_type": "traditional_japanese"
+          },
+          "requirements": {
+            "skills": [
+              {"name": "Java", "level": "advanced", "required": true, "weight": 0.9},
+              {"name": "Spring", "level": "intermediate", "required": true, "weight": 0.8},
+              {"name": "AWS", "level": "beginner", "required": false, "weight": 0.4}
+            ],
+            "experience_years": 5,
+            "education_level": "bachelor",
+            "languages": [
+              {"code": "ja", "level": "native", "required": true},
+              {"code": "en", "level": "basic", "required": false}
+            ]
+          },
+          "location": {
+            "city": "Nagoya",
+            "prefecture": "Aichi",
+            "remote_work": "on_site"
+          },
+          "salary_range": {
+            "min": 8000000,
+            "max": 12000000,
+            "currency": "JPY"
+          },
+          "cultural_requirements": {
+            "teamwork_emphasis": "very_high",
+            "hierarchy_level": "high",
+            "communication_style": "indirect",
+            "overtime_expectation": "high"
+          }
+        },
+        "match_score": 0.78,
+        "breakdown": {
+          "skills_match": 0.95,
+          "experience_match": 0.90,
+          "language_match": 0.85,
+          "cultural_fit": 0.95,
+          "location_match": 0.60,
+          "salary_alignment": 0.85
+        },
+        "human_feedback": {
+          "recruiter_score": 0.80,
+          "hiring_manager_score": 0.75,
+          "interview_outcome": "hired",
+          "performance_rating": 4.5,
+          "retention_months": 24
+        }
+      }
+    ],
+    "skill_mappings": [
+      {
+        "skill_name": "React",
+        "category": "frontend",
+        "related_skills": ["JavaScript", "TypeScript", "Redux", "Next.js", "Vue.js"],
+        "industry_demand": {
+          "technology": 0.95,
+          "finance": 0.70,
+          "healthcare": 0.60,
+          "manufacturing": 0.30
+        },
+        "proficiency_levels": {
+          "beginner": {
+            "description": "Basic component creation, JSX understanding",
+            "typical_experience_months": "0-6",
+            "common_tasks": ["Creating simple components", "Basic state management"]
+          },
+          "intermediate": {
+            "description": "Hooks usage, state management, routing",
+            "typical_experience_months": "6-24",
+            "common_tasks": ["Complex component architecture", "API integration"]
+          },
+          "advanced": {
+            "description": "Performance optimization, custom hooks, testing",
+            "typical_experience_months": "24-48",
+            "common_tasks": ["Architecture decisions", "Team mentoring"]
+          },
+          "expert": {
+            "description": "React internals, library creation, framework decisions",
+            "typical_experience_months": "48+",
+            "common_tasks": ["Technical leadership", "Framework selection"]
+          }
+        }
+      },
+      {
+        "skill_name": "Japanese Business Communication",
+        "category": "soft_skill",
+        "related_skills": ["Presentation Skills", "Negotiation", "Team Leadership"],
+        "cultural_components": [
+          "keigo_usage",
+          "meeting_etiquette",
+          "email_formatting",
+          "presentation_style",
+          "consensus_building"
+        ],
+        "proficiency_levels": {
+          "basic": {
+            "description": "Simple business conversations, basic keigo",
+            "jlpt_equivalent": "N3",
+            "workplace_tasks": ["Daily team meetings", "Simple email responses"]
+          },
+          "business": {
+            "description": "Complex discussions, proper keigo usage",
+            "jlpt_equivalent": "N2",
+            "workplace_tasks": ["Client presentations", "Negotiation support"]
+          },
+          "native": {
+            "description": "Nuanced communication, cultural sensitivity",
+            "jlpt_equivalent": "N1+",
+            "workplace_tasks": ["Strategic discussions", "Cultural mediation"]
+          }
+        }
+      }
+    ],
+    "cultural_assessments": [
+      {
+        "assessment_id": "cultural_001",
+        "candidate_id": "candidate_001",
+        "cultural_dimensions": {
+          "individualism_vs_collectivism": {
+            "score": 0.3,
+            "description": "Prefers team-oriented work environments"
+          },
+          "power_distance": {
+            "score": 0.7,
+            "description": "Comfortable with hierarchical structures"
+          },
+          "uncertainty_avoidance": {
+            "score": 0.8,
+            "description": "Prefers structured, predictable environments"
+          },
+          "long_term_orientation": {
+            "score": 0.9,
+            "description": "Values long-term career development"
+          }
+        },
+        "behavioral_indicators": [
+          "asks_clarifying_questions",
+          "seeks_group_consensus",
+          "respects_senpai_kohai_relationship",
+          "participates_in_nomikai",
+          "maintains_work_life_boundaries"
+        ],
+        "adaptation_factors": {
+          "language_barrier": 0.1,
+          "cultural_bridge_ability": 0.8,
+          "stress_management": 0.7,
+          "feedback_receptiveness": 0.9
+        }
+      }
+    ],
+    "feedback_samples": [
+      {
+        "feedback_id": "feedback_001",
+        "match_id": "pair_001",
+        "source": "hiring_manager",
+        "rating": 4.5,
+        "comments": "Excellent technical skills and cultural fit. Strong communication in both Japanese and English.",
+        "improvement_areas": ["AWS experience", "team leadership skills"],
+        "outcome": "hired",
+        "performance_after_6_months": 4.2
+      }
+    ],
+    "training_parameters": {
+      "model_architecture": "transformer",
+      "embedding_dimension": 768,
+      "learning_rate": 0.0001,
+      "batch_size": 32,
+      "epochs": 100,
+      "validation_split": 0.2,
+      "early_stopping_patience": 10,
+      "feature_weights": {
+        "skills_match": 0.25,
+        "experience_match": 0.20,
+        "language_match": 0.15,
+        "cultural_fit": 0.20,
+        "location_match": 0.10,
+        "salary_alignment": 0.10
+      }
+    }
+  },
+  "validation_metrics": {
+    "accuracy_targets": {
+      "overall_match_prediction": 0.85,
+      "skills_assessment": 0.90,
+      "cultural_fit_prediction": 0.80,
+      "interview_success_prediction": 0.75
+    },
+    "bias_detection": {
+      "gender_bias_threshold": 0.05,
+      "age_bias_threshold": 0.05,
+      "nationality_bias_threshold": 0.05,
+      "education_bias_threshold": 0.10
+    }
+  }
+}
