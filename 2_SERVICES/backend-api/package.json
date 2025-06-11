@@ -79,6 +79,27 @@
     "matching",
     "ai"
   ],
-  "author": "iWORKZ Team",
+  "authors": [
+    {
+      "name": "Carlos Mundim",
+      "role": "Project Lead & Technical Architect",
+      "linkedin": "https://www.linkedin.com/in/carlosmundim/"
+    },
+    {
+      "name": "Prof. Jeanette Dennisson",
+      "role": "AI-Integration Architecture Leader & Strategic Advisor", 
+      "linkedin": "https://www.linkedin.com/in/jeanette-dennisson-246063a1/"
+    },
+    {
+      "name": "Claude Code (Anthropic)",
+      "role": "AI Development Partner & Documentation Architect",
+      "contributions": "Platform architecture, code generation, technical documentation"
+    }
+  ],
+  "technologies": ["Node.js", "Express.js", "TypeScript", "PostgreSQL", "Redis", "Docker", "Kubernetes"],
+  "platforms": ["AWS", "Ubuntu", "WSL2"],
+  "tools": ["GitHub", "Git", "Visual Studio Code", "npm", "Terraform"],
+  "aiTools": ["Claude Code", "OpenAI GPT", "GitHub Copilot"],
+  "handoverDate": "2025-06-08",
   "license": "PROPRIETARY"
 }

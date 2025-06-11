@@ -2,6 +2,28 @@
   "name": "iworkz-web-frontend",
   "version": "1.0.0",
   "private": true,
+  "authors": [
+    {
+      "name": "Carlos Mundim",
+      "role": "Project Lead & Technical Architect",
+      "linkedin": "https://www.linkedin.com/in/carlosmundim/"
+    },
+    {
+      "name": "Prof. Jeanette Dennisson",
+      "role": "AI-Integration Architecture Leader & Strategic Advisor",
+      "linkedin": "https://www.linkedin.com/in/jeanette-dennisson-246063a1/"
+    },
+    {
+      "name": "Claude Code (Anthropic)",
+      "role": "AI Development Partner & Documentation Architect",
+      "contributions": "Frontend architecture, React development, UI/UX implementation"
+    }
+  ],
+  "technologies": ["React", "Next.js 14", "TypeScript", "Tailwind CSS", "Zustand"],
+  "platforms": ["Vercel", "Ubuntu", "WSL2"],
+  "tools": ["GitHub", "Git", "Visual Studio Code", "npm"],
+  "aiTools": ["Claude Code", "GitHub Copilot"],
+  "handoverDate": "2025-06-08",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

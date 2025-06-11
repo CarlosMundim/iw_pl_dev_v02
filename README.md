@@ -256,14 +256,50 @@ The iWORKZ platform leverages AI throughout the stack:
 
 ---
 
-## 👥 Team & Support
+## 👥 Project Leadership & Development Team
 
-### Core Team
+### Project Leaders
 
-* **CEO:** Strategic vision and business development
-* **CTO:** Technical architecture and AI development
-* **CPO:** Product strategy and user experience
-* **VP Engineering:** Platform development and operations
+* **Carlos Mundim** - Project Lead & Technical Architect  
+  LinkedIn: https://www.linkedin.com/in/carlosmundim/
+* **Prof. Jeanette Dennisson** - AI-Integration Architecture Leader & Strategic Advisor  
+  LinkedIn: https://www.linkedin.com/in/jeanette-dennisson-246063a1/
+
+### AI Development Partner
+
+* **Claude Code (Anthropic)** - AI Development Partner & Documentation Architect  
+  Contributions: Platform architecture design, code generation, comprehensive documentation, technical problem-solving
+
+### Development Collaboration
+
+This platform was developed through innovative human-AI collaboration, combining human strategic vision with AI-powered development capabilities to create an enterprise-grade employment matching solution.
+
+### Technology Stack & Tools
+
+**Core Technologies:**
+* **Frontend:** React, Next.js 14, TypeScript, Tailwind CSS
+* **Backend:** Node.js, Express.js, Python, FastAPI
+* **Databases:** PostgreSQL 15, Redis 7.0, Elasticsearch 8.0
+* **AI/ML:** TensorFlow, PyTorch, scikit-learn, OpenAI GPT
+
+**Infrastructure & DevOps:**
+* **Containerization:** Docker, Kubernetes
+* **Cloud Platforms:** AWS, Vercel
+* **Operating Systems:** Ubuntu, WSL2
+* **Infrastructure as Code:** Terraform
+
+**Development Tools:**
+* **Version Control:** GitHub, Git
+* **IDE:** Visual Studio Code
+* **Package Managers:** npm, pip
+* **CI/CD:** GitHub Actions
+
+**AI-Powered Development Tools:**
+* **Claude Code (Anthropic)** - Primary AI development partner
+* **OpenAI GPT** - AI matching algorithms
+* **GitHub Copilot** - Code generation assistance
+
+**Project Handover Date:** 8th June 2025
 
 ### Getting Help
 
