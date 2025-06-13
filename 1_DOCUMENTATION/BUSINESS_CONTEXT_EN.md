@@ -1,111 +1,68 @@
 # iWORKZ Business Context
 
-**Elevator Pitch**  
-*iWORKZ is an AI-powered workforce platform founded in Japan, engineered to transform international talent mobility and revolutionise technical and healthcare workforces. We connect global employers with high-value STEM and care professionals—faster, smarter, and with unrivalled compliance, cultural intelligence, and wellbeing at the core.*
+**Elevator Pitch:**  
+*iWORKZ is the AI-powered platform made in Japan, unlocking seamless international talent mobility and workforce transformation for the world’s most critical sectors, connecting global enterprises to high-value STEM technical and healthcare talent faster, smarter, and with a radical focus on compliance and wellbeing.*
 
 ---
 
-## 🌏 Strategic Focus
+## Vision
 
-iWORKZ launches from the heart of **Asia’s most dynamic economies**—Japan, Korea, Taiwan, Hong Kong, and Singapore—where talent shortages, demographic headwinds, and global ambitions converge.
-
-**Near-term sourcing focus:**
-- **China (Shandong Province)**
-- **ASEAN universities and training networks**
-- **India and Philippines** for technical and IT talent
-- **Vietnam, Indonesia, Thailand** for manufacturing and support roles
-
-These pipelines feed East Asia’s most in-demand sectors.
+To become the world’s leading platform for international worker enhancement through AI and mobility—removing friction, raising standards, and improving the lives of foreign and local workers across Japan, Korea, Taiwan, Hong Kong, Singapore, the UK, Ireland, Australia, Canada, Germany, and New Zealand.
 
 ---
 
-## 🚀 Vision
+## Market Opportunity
 
-**Mission:**  
-*To eliminate every barrier to fair, global work for both employers and workers.*
-
-**Our Vision:**  
-To become the world’s most trusted AI platform for international workforce enablement—removing friction, raising standards, and improving lives for both foreign and domestic workers, starting in Asia and scaling worldwide.
-
----
-
-## 📈 Market Opportunity
-
-- **$500B+ global labour mobility market**: Key sectors such as healthcare, infrastructure, energy, and technology face critical, long-term shortages.
-- **East Asia’s urgency**: Japan, Korea, Taiwan, and Singapore are world leaders in both ageing populations and skilled labour gaps.
-- **OECD forecast**: A worldwide deficit of **18M+ healthcare and technical professionals by 2030**  
-  [OECD Employment Outlook 2023](https://www.oecd.org/employment/Outlook-2023.pdf)
-- **Policy tailwinds**: From Japan’s Specified Skilled Worker (SSW) reforms to Singapore’s sectoral transformation drives, momentum for change is accelerating.
+- **$500B+ global labour mobility market:** High-value segments (healthcare, engineering, energy, construction, IT) face chronic shortages and surging cross-border demand.
+- **Ageing populations:** OECD countries forecast a shortfall of 18M+ healthcare and technical workers by 2030【https://www.oecd.org/employment/Outlook-2023.pdf】.
+- **Compliance and ESG pressures:** New legislation and consumer scrutiny require smarter, transparent, AI-powered solutions to protect both workers and employers.
+- **Incumbent platforms are failing:** Fragmented, manual, or country-specific players (e.g. traditional recruiters, generic job boards) cannot meet global compliance, quality, and speed expectations.
 
 ---
 
-## 💥 The Problem
+## Problem We Solve
 
-- **Cross-border hiring is broken**: Legal, regulatory, and credentialling complexity causes long delays and risk in high-stakes sectors.
-- **Foreign workers lack support**: Language barriers, opaque processes, and poor wellbeing drive churn and underperformance.
-- **Japan-specific vendor gaps**: Traditional giants (e.g., TechnoPro) dominate but lack flexibility, AI integration, or SME-centric offerings.
-- **SMEs underserved**: Small and medium Japanese enterprises cannot access affordable, localised AI tools or tailored international talent solutions.
-
----
-
-## ✅ Our Solution
-
-**iWORKZ unifies global mobility, AI automation, and worker wellbeing on a single, seamless platform:**
-
-- **AI-powered matching & onboarding**: Automated vetting, credentialling, and document workflows—reducing hiring time by up to 60%.
-- **Global employment infrastructure**: EOR, payroll, visa, and benefits provision across all supported countries, with robust local compliance.
-- **Vendor augmentation & talent pipelines**: Strengthen Japanese IT/AI teams with top engineers and developers from ASEAN, China, and India.
-- **Custom AI Agents for SMEs**: Bespoke “concierge” agents (MCPs) like Tomoo, for onboarding, task management, HR, compliance, and ongoing support.
-- **Candidate-first experience**: Integrated upskilling, wellness support, native language navigation, and transparent career pathways.
-- **Multilingual AI assistants**: Culturally attuned, 24/7 support for employers and workers alike.
+- **Complexity and risk:** Global hiring is slowed by legal, regulatory, and compliance hurdles—especially in healthcare, technical and EPC (Engineering, Procurement & Construction) roles.
+- **Poor candidate experience:** Foreign workers face fragmented support, low transparency, and limited upskilling.
+- **Legacy solutions lag behind:** Traditional staffing and recruitment models are not designed for modern, AI-driven, borderless hiring.
 
 ---
 
-## 🔍 Why iWORKZ Stands Apart
+## Our Solution
 
-- **Sector expertise**: Built for regulated, high-barrier sectors (healthcare, EPC, IT, construction)—not just remote freelancers.
-- **“Local + global” DNA**: Asian-first, with global-ready APIs and a compliance stack for effortless scaling.
-- **AI-native from day one**: Matching, onboarding, wellbeing, vendor coordination, and SME empowerment—all powered by proprietary AI.
-- **ESG-aligned**: Direct alignment with UN SDGs—fair labour, education, wellbeing, and responsible innovation.
-- **Proven leadership**: Founded by global mobility, outsourcing, and AI pioneers in Japan and across Asia-Pacific.
+iWORKZ is a next-generation hiring, placement, and workforce enablement platform, inspired by the best of Deel and modern EOR/GEO models, but engineered specifically for global technical, healthcare, and EPC talent flows.
 
-**Example:**  
-*Unlike legacy staffing giants such as TechnoPro, iWORKZ provides SME-specific AI onboarding agents and transparent, integrated support from source country to arrival—reducing churn and increasing placement quality.*
+- **AI-powered matching and compliance:** Automated, role-specific vetting, credential validation, and onboarding—reducing time-to-hire by up to 60%.
+- **Seamless EOR and global mobility:** One-click international employment, payroll, and benefits for enterprises—ensuring 100% local compliance.
+- **Worker-centric experience:** Continuous upskilling, language support, mental health and wellbeing, and career progression for candidates.
+- **Culturally-sensitive AI agents:** Personalised onboarding and engagement, with built-in language and compliance support.
 
 ---
 
-## ⏳ Why Now?
+## Differentiation
 
-- **Labour shortages are now structural** across Japan, Korea, and the wider OECD region.
-- **AI maturity and digital transformation** enable leapfrogging of outdated staffing models.
-- **Geopolitical shifts**: ASEAN, India, and China have become the world’s central sourcing markets for skilled talent.
-- **Momentum is building**: Regulatory reforms and corporate urgency mean the window for digital solutions is open—now.
-
----
-
-## 📊 Traction & Milestones
-
-- **Pilot projects launching Q3 2025** with leading Japanese staffing clients.
-- **First cross-border healthcare deployment** scheduled for Singapore.
-- **Active partnerships** with top universities and training providers across ASEAN and Shandong Province.
+- **Technical and regulated sectors:** Purpose-built for high-barrier fields (healthcare, EPC, engineering, medical staff)—not just “white-collar” remote jobs.
+- **Advanced AI stack:** Proprietary matching, compliance, and wellbeing algorithms—enabling rapid scale and true global reach.
+- **ESG-aligned impact:** Improving standards and wellbeing for both foreign and local workers—demonstrable, auditable, and aligned with UN SDGs.
+- **Enterprise integration:** API-driven, modular platform designed to plug into enterprise HR, compliance, and payroll systems.
+- **Team pedigree:** Led by a multicultural team with decades of experience in global mobility, tech, and strategic HR (Outsourcing Group Inc., Fortune 500).
 
 ---
 
-## 🛠️ How It Works (at a glance)
+## Why Now?
 
-1. **Source:**  
-   - Tap into partner universities, agencies, and AI-powered talent pools in ASEAN, China, and India.
-2. **Match:**  
-   - Instantly screen, vet, and match talent using AI-driven workflows and compliance checks.
-3. **Onboard & Support:**  
-   - Seamless, compliant onboarding, upskilling, and ongoing wellbeing support for both employers and candidates.
+- **Labour shortages are hitting crisis point** across the world’s largest economies, especially in healthcare, energy, infrastructure, and STEM.
+- **Regulatory and consumer scrutiny** is rising—compliance and ESG are non-negotiable for global employers.
+- **AI and automation** now enable what was impossible five years ago: compliant, borderless, real-time hiring and workforce management.
 
 ---
 
-## 🤝 Call to Action
+## Call to Action
 
-**Are you building an AI-ready workforce or hiring cross-border in healthcare, engineering, IT, or skilled trades?**
+Ready to transform your global talent strategy?  
+**Contact us for a confidential demo or strategic partnership discussion: [info@iworkz.ai](mailto:info@iworkz.ai)**
 
-If you’re a Japanese SME, a global staffing leader, or an Asian tech founder, let’s build the future of work—starting in Asia, and scaling worldwide.
+---
 
-**📧 Contact us: [info@iworkz.ai](mailto:info@iworkz.ai)**
+*For more details, see our full business plan, market analysis, and technology roadmap, available under NDA to qualified partners and investors.*
+
