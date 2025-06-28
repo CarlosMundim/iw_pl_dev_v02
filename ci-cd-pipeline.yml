@@ -1,0 +1,583 @@
+name: iWORKZ CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, staging ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # =============================================================================
+  # CODE QUALITY AND TESTING
+  # =============================================================================
+  code-quality:
+    name: Code Quality & Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: |
+            2_SERVICES/backend-api/package-lock.json
+            2_SERVICES/web-frontend/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Node.js dependencies
+        run: |
+          cd 2_SERVICES/backend-api && npm ci
+          cd ../web-frontend && npm ci
+
+      - name: Install Python dependencies
+        run: |
+          cd 2_SERVICES/ai-agent
+          pip install -r requirements.txt
+
+      - name: Run ESLint (Backend API)
+        run: |
+          cd 2_SERVICES/backend-api
+          npm run lint
+
+      - name: Run ESLint (Web Frontend)
+        run: |
+          cd 2_SERVICES/web-frontend
+          npm run lint
+
+      - name: Run Python linting
+        run: |
+          cd 2_SERVICES/ai-agent
+          pip install flake8 black isort
+          flake8 src/ --max-line-length=88 --extend-ignore=E203,W503
+          black --check src/
+          isort --check-only src/
+
+      - name: TypeScript type checking
+        run: |
+          cd 2_SERVICES/backend-api && npm run type-check
+          cd ../web-frontend && npm run type-check
+
+      - name: Security scan with CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript, python
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # =============================================================================
+  # UNIT AND INTEGRATION TESTS
+  # =============================================================================
+  test-backend:
+    name: Backend API Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: iworkz_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 2_SERVICES/backend-api/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd 2_SERVICES/backend-api
+          npm ci
+
+      - name: Run database migrations
+        run: |
+          cd 2_SERVICES/backend-api
+          npm run migrate
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/iworkz_test
+          REDIS_URL: redis://localhost:6379
+
+      - name: Run unit tests
+        run: |
+          cd 2_SERVICES/backend-api
+          npm run test:unit
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/iworkz_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test_jwt_secret
+
+      - name: Run integration tests
+        run: |
+          cd 2_SERVICES/backend-api
+          npm run test:integration
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/iworkz_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test_jwt_secret
+
+      - name: Generate test coverage
+        run: |
+          cd 2_SERVICES/backend-api
+          npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./2_SERVICES/backend-api/coverage/lcov.info
+          flags: backend
+
+  test-ai-agent:
+    name: AI Agent Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: iworkz_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 2_SERVICES/ai-agent/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          cd 2_SERVICES/ai-agent
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: Run database migrations
+        run: |
+          cd 2_SERVICES/ai-agent
+          python -m alembic upgrade head
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/iworkz_test
+
+      - name: Run unit tests
+        run: |
+          cd 2_SERVICES/ai-agent
+          pytest tests/unit/ -v --cov=src --cov-report=xml
+        env:
+          DATABASE_URL: postgresql://postgres:test_password@localhost:5432/iworkz_test
+          OPENAI_API_KEY: test_key
+          ANTHROPIC_API_KEY: test_key
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./2_SERVICES/ai-agent/coverage.xml
+          flags: ai-agent
+
+  test-frontend:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 2_SERVICES/web-frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd 2_SERVICES/web-frontend
+          npm ci
+
+      - name: Run unit tests
+        run: |
+          cd 2_SERVICES/web-frontend
+          npm run test:unit
+
+      - name: Run component tests
+        run: |
+          cd 2_SERVICES/web-frontend
+          npm run test:components
+
+      - name: Build application
+        run: |
+          cd 2_SERVICES/web-frontend
+          npm run build
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./2_SERVICES/web-frontend/coverage/lcov.info
+          flags: frontend
+
+  # =============================================================================
+  # END-TO-END TESTING
+  # =============================================================================
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-ai-agent, test-frontend]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start test environment
+        run: |
+          cd tests/e2e
+          docker-compose up -d
+          
+      - name: Wait for services to be ready
+        run: |
+          cd tests/e2e
+          ./wait-for-services.sh
+
+      - name: Setup Python for E2E tests
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install E2E test dependencies
+        run: |
+          cd tests/e2e
+          pip install -r requirements.txt
+
+      - name: Run E2E tests
+        run: |
+          cd tests/e2e
+          python -m pytest test_platform_e2e.py -v --html=report.html
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: e2e-test-results
+          path: tests/e2e/report.html
+
+      - name: Cleanup test environment
+        if: always()
+        run: |
+          cd tests/e2e
+          docker-compose down -v
+
+  # =============================================================================
+  # DOCKER IMAGE BUILDING
+  # =============================================================================
+  build-images:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [code-quality, test-backend, test-ai-agent, test-frontend]
+    if: github.event_name == 'push'
+    
+    strategy:
+      matrix:
+        service: [backend-api, ai-agent, web-frontend]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./2_SERVICES/${{ matrix.service }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # =============================================================================
+  # SECURITY SCANNING
+  # =============================================================================
+  security-scan:
+    name: Security Scan Docker Images
+    runs-on: ubuntu-latest
+    needs: [build-images]
+    if: github.event_name == 'push'
+    
+    strategy:
+      matrix:
+        service: [backend-api, ai-agent, web-frontend]
+    
+    steps:
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.service }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results-${{ matrix.service }}.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results-${{ matrix.service }}.sarif'
+
+  # =============================================================================
+  # DEPLOYMENT TO STAGING
+  # =============================================================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build-images, security-scan]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to staging server
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }} << 'EOF'
+            cd /opt/iworkz/platform
+            git pull origin develop
+            cd 4_DEPLOYMENT/staging
+            
+            # Update environment variables
+            echo "GITHUB_SHA=${{ github.sha }}" >> .env.staging
+            echo "DEPLOYMENT_TIME=$(date -Iseconds)" >> .env.staging
+            
+            # Run deployment script
+            ./deploy-staging.sh
+            
+            # Health check
+            sleep 60
+            curl -f https://staging-api.iworkz.com/health || exit 1
+          EOF
+
+      - name: Run post-deployment tests
+        run: |
+          cd tests/integration
+          python -m pytest test_api_integration.py \
+            --base-url=https://staging-api.iworkz.com \
+            --timeout=30
+
+      - name: Notify deployment status
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          message: |
+            Staging deployment ${{ job.status }}!
+            Branch: ${{ github.ref }}
+            Commit: ${{ github.sha }}
+            URL: https://staging.iworkz.com
+
+  # =============================================================================
+  # DEPLOYMENT TO PRODUCTION
+  # =============================================================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-images, security-scan]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRODUCTION_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Create production backup
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            cd /opt/iworkz/platform
+            ./scripts/backup-production.sh
+          EOF
+
+      - name: Deploy to production (Blue-Green)
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+            cd /opt/iworkz/platform
+            git pull origin main
+            
+            # Update environment variables
+            echo "GITHUB_SHA=${{ github.sha }}" >> .env.production
+            echo "DEPLOYMENT_TIME=$(date -Iseconds)" >> .env.production
+            
+            # Run blue-green deployment
+            ./scripts/blue-green-deploy.sh
+          EOF
+
+      - name: Run production health checks
+        run: |
+          cd tests/integration
+          python -m pytest test_api_integration.py \
+            --base-url=https://api.iworkz.com \
+            --timeout=30
+
+      - name: Run production smoke tests
+        run: |
+          cd tests/smoke
+          python -m pytest test_production_smoke.py \
+            --base-url=https://api.iworkz.com
+
+      - name: Notify deployment status
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          message: |
+            🚀 Production deployment ${{ job.status }}!
+            Branch: ${{ github.ref }}
+            Commit: ${{ github.sha }}
+            URL: https://iworkz.com
+
+  # =============================================================================
+  # PERFORMANCE TESTING
+  # =============================================================================
+  performance-test:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup K6
+        run: |
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run performance tests
+        run: |
+          cd tests/performance
+          k6 run --out json=results.json load-test.js
+        env:
+          BASE_URL: https://staging-api.iworkz.com
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-results
+          path: tests/performance/results.json
+
+  # =============================================================================
+  # CLEANUP
+  # =============================================================================
+  cleanup:
+    name: Cleanup Old Resources
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    
+    steps:
+      - name: Cleanup old container images
+        run: |
+          # Clean up old images (keep last 10)
+          IMAGE_NAME="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          for service in backend-api ai-agent web-frontend; do
+            # This would typically use the GitHub Packages API to clean up old images
+            echo "Cleaning up old images for $service"
+          done
+
+      - name: Cleanup workflow artifacts
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: |
+            e2e-test-results
+            performance-results
+          failOnError: false

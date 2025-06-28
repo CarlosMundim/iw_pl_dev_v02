@@ -1,0 +1,330 @@
+name: Mobile App CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: [ '2_SERVICES/mobile-app/**' ]
+  pull_request:
+    branches: [ main, develop ]
+    paths: [ '2_SERVICES/mobile-app/**' ]
+
+jobs:
+  # =============================================================================
+  # MOBILE APP TESTING AND BUILDING
+  # =============================================================================
+  test-mobile:
+    name: Test Mobile App
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 2_SERVICES/mobile-app/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd 2_SERVICES/mobile-app
+          npm ci
+
+      - name: Run TypeScript check
+        run: |
+          cd 2_SERVICES/mobile-app
+          npm run type-check
+
+      - name: Run ESLint
+        run: |
+          cd 2_SERVICES/mobile-app
+          npm run lint
+
+      - name: Run unit tests
+        run: |
+          cd 2_SERVICES/mobile-app
+          npm run test:unit
+
+      - name: Run component tests
+        run: |
+          cd 2_SERVICES/mobile-app
+          npm run test:components
+
+      - name: Generate test coverage
+        run: |
+          cd 2_SERVICES/mobile-app
+          npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./2_SERVICES/mobile-app/coverage/lcov.info
+          flags: mobile
+
+  # =============================================================================
+  # ANDROID BUILD
+  # =============================================================================
+  build-android:
+    name: Build Android App
+    runs-on: ubuntu-latest
+    needs: [test-mobile]
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 2_SERVICES/mobile-app/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2
+
+      - name: Install dependencies
+        run: |
+          cd 2_SERVICES/mobile-app
+          npm ci
+
+      - name: Create environment config
+        run: |
+          cd 2_SERVICES/mobile-app
+          cat > .env << EOF
+          API_URL=${{ github.ref == 'refs/heads/main' && 'https://api.iworkz.com' || 'https://staging-api.iworkz.com' }}
+          ENVIRONMENT=${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+          VERSION_CODE=${{ github.run_number }}
+          VERSION_NAME=${{ github.sha }}
+          EOF
+
+      - name: Generate Android assets
+        run: |
+          cd 2_SERVICES/mobile-app
+          npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle
+
+      - name: Build Android APK (Debug)
+        if: github.ref != 'refs/heads/main'
+        run: |
+          cd 2_SERVICES/mobile-app/android
+          ./gradlew assembleDebug
+
+      - name: Build Android AAB (Release)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd 2_SERVICES/mobile-app/android
+          echo "${{ secrets.ANDROID_SIGNING_KEY }}" | base64 -d > app/keystore.jks
+          ./gradlew bundleRelease
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-app
+          path: |
+            2_SERVICES/mobile-app/android/app/build/outputs/apk/debug/*.apk
+            2_SERVICES/mobile-app/android/app/build/outputs/bundle/release/*.aab
+
+  # =============================================================================
+  # IOS BUILD
+  # =============================================================================
+  build-ios:
+    name: Build iOS App
+    runs-on: macos-latest
+    needs: [test-mobile]
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 2_SERVICES/mobile-app/package-lock.json
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
+
+      - name: Install dependencies
+        run: |
+          cd 2_SERVICES/mobile-app
+          npm ci
+
+      - name: Install iOS dependencies
+        run: |
+          cd 2_SERVICES/mobile-app/ios
+          pod install
+
+      - name: Create environment config
+        run: |
+          cd 2_SERVICES/mobile-app
+          cat > .env << EOF
+          API_URL=${{ github.ref == 'refs/heads/main' && 'https://api.iworkz.com' || 'https://staging-api.iworkz.com' }}
+          ENVIRONMENT=${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+          VERSION_CODE=${{ github.run_number }}
+          VERSION_NAME=${{ github.sha }}
+          EOF
+
+      - name: Build iOS app (Debug)
+        if: github.ref != 'refs/heads/main'
+        run: |
+          cd 2_SERVICES/mobile-app
+          npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle
+          cd ios
+          xcodebuild -workspace iWORKZ.xcworkspace -scheme iWORKZ -configuration Debug -destination 'generic/platform=iOS Simulator' build
+
+      - name: Build iOS app (Release)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          cd 2_SERVICES/mobile-app
+          npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle
+          cd ios
+          # Configure signing certificates here
+          xcodebuild -workspace iWORKZ.xcworkspace -scheme iWORKZ -configuration Release -destination 'generic/platform=iOS' archive -archivePath iWORKZ.xcarchive
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+
+      - name: Upload iOS artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-app
+          path: |
+            2_SERVICES/mobile-app/ios/build/
+            2_SERVICES/mobile-app/ios/*.xcarchive
+
+  # =============================================================================
+  # MOBILE APP DEPLOYMENT
+  # =============================================================================
+  deploy-mobile-staging:
+    name: Deploy Mobile App to TestFlight/Beta
+    runs-on: ubuntu-latest
+    needs: [build-android, build-ios]
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Download Android artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: android-app
+
+      - name: Deploy to Google Play Internal Testing
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
+          packageName: com.iworkz.app
+          releaseFiles: android/app/build/outputs/apk/debug/*.apk
+          track: internal
+          status: completed
+
+      - name: Download iOS artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ios-app
+
+      - name: Deploy to TestFlight
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-path: ios/*.xcarchive
+          issuer-id: ${{ secrets.APPLE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPLE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPLE_API_PRIVATE_KEY }}
+
+  deploy-mobile-production:
+    name: Deploy Mobile App to Production
+    runs-on: ubuntu-latest
+    needs: [build-android, build-ios]
+    if: github.ref == 'refs/heads/main'
+    environment: mobile-production
+    
+    steps:
+      - name: Download Android artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: android-app
+
+      - name: Deploy to Google Play Store
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
+          packageName: com.iworkz.app
+          releaseFiles: android/app/build/outputs/bundle/release/*.aab
+          track: production
+          status: completed
+
+      - name: Download iOS artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ios-app
+
+      - name: Deploy to App Store
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-path: ios/*.xcarchive
+          issuer-id: ${{ secrets.APPLE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPLE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPLE_API_PRIVATE_KEY }}
+          submit-for-review: true
+
+  # =============================================================================
+  # MOBILE E2E TESTING
+  # =============================================================================
+  mobile-e2e-test:
+    name: Mobile E2E Testing
+    runs-on: ubuntu-latest
+    needs: [deploy-mobile-staging]
+    if: github.ref == 'refs/heads/develop'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup Appium
+        run: |
+          npm install -g appium
+          appium driver install uiautomator2
+          appium driver install xcuitest
+
+      - name: Install test dependencies
+        run: |
+          cd tests/mobile-e2e
+          npm ci
+
+      - name: Run Android E2E tests
+        run: |
+          cd tests/mobile-e2e
+          npm run test:android
+        env:
+          APP_PATH: ${{ github.workspace }}/android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: mobile-e2e-results
+          path: tests/mobile-e2e/reports/
